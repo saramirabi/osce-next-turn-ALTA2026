@@ -6,7 +6,7 @@ Computes, per generated/human turn:
     cos_p = cos( embed(nu(turn)), embed(p_i) )   # vs patient's last turn
 
 Encoder : all-MiniLM-L6-v2 (sentence-transformers), frozen, score-only.
-Inputs  : the seven final_<Model>_1500_NEXT_TURN_V1.csv files.
+Inputs  : the six final_<Model>_1500_NEXT_TURN_V1.csv files.
           Columns used: context_id, dialogue_id, generated_doctor_turn,
           human_doctor_target, latest_patient_turn.
 Turns are normalised with nu() before scoring, matching the paper's described
@@ -33,15 +33,13 @@ import pandas as pd
 
 FILE_TO_SOURCE = {
     "final_Claude_1500_NEXT_TURN_V1.csv":   "Claude",
-    "final_DeepSeek_1500_NEXT_TURN_V1.csv": "DeepSeek",   # not in paper draft; drop if unused
     "final_Gemini_1500_NEXT_TURN_V1.csv":   "Gemini",
     "final_GPT_1500_NEXT_TURN_V1.csv":      "GPT",
     "final_MedGemma_1500_NEXT_TURN_V1.csv": "MedGemma",
     "final_MedLlama_1500_NEXT_TURN_V1.csv": "MedLlama",
-    "final_Qwen_1500_NEXT_TURN_V1.csv":   "Qwen",
+    "final_Qwen_1500_NEXT_TURN_V1.csv":     "Qwen",
 }
-SOURCE_ORDER = ["Human", "Gemini", "Claude", "GPT", "Qwen",
-                "MedGemma", "MedLlama", "DeepSeek"]
+SOURCE_ORDER = ["Human", "Gemini", "Claude", "GPT", "Qwen", "MedGemma", "MedLlama"]
 
 # --- nu(): normalisation matching the paper's description --------------------
 ROLE_LABEL_RE = re.compile(r"^\s*(doctor|dr|clinician|physician)\s*:\s*", re.I)
@@ -65,8 +63,6 @@ def main():
     ap.add_argument("--data_dir", default=os.path.join(os.path.dirname(__file__), "..", "data"))
     ap.add_argument("--out_dir", default=os.path.join(os.path.dirname(__file__), "..", "out"))
     ap.add_argument("--model", default="all-MiniLM-L6-v2")
-    ap.add_argument("--drop_deepseek", action="store_true",
-                    help="exclude the DeepSeek file (not in the paper draft)")
     args = ap.parse_args()
     os.makedirs(args.out_dir, exist_ok=True)
 
@@ -84,8 +80,6 @@ def main():
         src = FILE_TO_SOURCE.get(name)
         if src is None:
             print(f"[skip] unrecognised file {name}")
-            continue
-        if src == "DeepSeek" and args.drop_deepseek:
             continue
         df = pd.read_csv(f)
         for _, r in df.iterrows():

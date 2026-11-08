@@ -11,7 +11,6 @@ import random
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from statistics import mean, median
 from typing import Any
 
 from openai import (
@@ -51,7 +50,6 @@ PROMPT_TEMPLATE = f"{INSTRUCTIONS}\n{CONVERSATION_HEADER}"
 INPUT_SAMPLE = PROJECT_DIR / "data" / "final_1500_TRULY_FROZEN.csv"
 OUTPUT_CSV = PROJECT_DIR / "data" / "final_MedLlama_1500_NEXT_TURN_V1.csv"
 RAW_JSONL = PROJECT_DIR / "data" / "final_MedLlama_1500_NEXT_TURN_V1_raw.jsonl"
-REPORT_MD = PROJECT_DIR / "out" / "final_MedLlama_1500_NEXT_TURN_V1_report.md"
 CONFIG_JSON = PROJECT_DIR / "config" / "MedLlama_1500_NEXT_TURN_V1_config.json"
 
 FORBIDDEN_PROMPT_MARKERS = [
@@ -101,7 +99,7 @@ def load_sample_rows(path: Path) -> list[dict[str, str]]:
     with path.open(encoding="utf-8-sig", newline="") as handle:
         rows = list(csv.DictReader(handle))
     if len(rows) != SAMPLE_SIZE:
-        raise ValueError(f"Expected {SAMPLE_SIZE} pilot rows, found {len(rows)}.")
+        raise ValueError(f"Expected {SAMPLE_SIZE} rows, found {len(rows)}.")
     context_ids = [row["context_id"] for row in rows]
     target_ids = [row["target_turn_id"] for row in rows]
     if len(set(context_ids)) != SAMPLE_SIZE:
@@ -327,7 +325,6 @@ def run_generation(
     pending = [row for row in rows if row["context_id"] not in completed]
     print(f"Resume state: {len(completed)} completed, {len(pending)} pending.")
 
-    total_retries = 0
     for index, row in enumerate(pending, start=1):
         context_id = row["context_id"]
         user_input = build_user_input(row["context"])
@@ -336,7 +333,6 @@ def run_generation(
         response, retry_count, error_message, call_metadata = call_model_with_retries(
             client, user_input, parameter_notes
         )
-        total_retries += retry_count
 
         output_row: dict[str, Any] = {
             "context_id": context_id,
@@ -409,89 +405,13 @@ def run_generation(
         all_rows.append(output_row)
         print(f"[{index}/{len(pending)}] {context_id}: {output_row['api_request_status']}")
 
-    write_report(all_rows, model_id, parameter_notes, total_retries, base_url)
     final_validation(rows, all_rows)
 
 
-def write_report(
-    rows: list[dict[str, Any]],
-    model_id: str,
-    parameter_notes: list[str],
-    total_retries: int,
-    base_url: str,
-) -> None:
-    successes = [row for row in rows if row.get("api_request_status") == "success"]
-    failures = [row for row in rows if row.get("api_request_status") != "success"]
-    input_tokens = [int(row["input_tokens"]) for row in successes if row.get("input_tokens")]
-    output_tokens = [int(row["output_tokens"]) for row in successes if row.get("output_tokens")]
-    empty_responses = sum(
-        1 for row in successes if not str(row.get("generated_doctor_turn", "")).strip()
-    )
-
-    lines = [
-        "# MedLlama Full 1500 Report (NEXT_TURN_V1)",
-        "",
-        f"Generated: {datetime.now(timezone.utc).isoformat()}",
-        "",
-        "## Operational summary",
-        "",
-        f"- Requested contexts: {SAMPLE_SIZE}",
-        f"- Successful generations: {len(successes)}",
-        f"- Failed generations: {len(failures)}",
-        f"- Retries: {total_retries}",
-        f"- Empty responses: {empty_responses}",
-        "",
-        "## Model and prompt",
-        "",
-        f"- Model ID: `{model_id}`",
-        f"- Provider: `{MODEL_PROVIDER}`",
-        f"- Base URL: `{base_url}`",
-        f"- Prompt version: `{PROMPT_VERSION}`",
-        "",
-        "## Generation settings",
-        "",
-        f"- Requested temperature: `{REQUESTED_TEMPERATURE}`",
-        f"- Reasoning setting: `{REASONING_SETTING}`",
-        f"- Max output tokens: `{MAX_OUTPUT_TOKENS}`",
-        f"- Tools / web search / retrieval / function calling: disabled",
-        "",
-    ]
-    if parameter_notes:
-        lines.extend(["### Parameter notes", ""])
-        for note in parameter_notes:
-            lines.append(f"- {note}")
-        lines.append("")
-
-    if input_tokens:
-        lines.extend(
-            [
-                "## Token usage",
-                "",
-                f"- Mean input tokens: {mean(input_tokens):.1f}",
-                f"- Median input tokens: {median(input_tokens):.1f}",
-                f"- Mean output tokens: {mean(output_tokens):.1f}",
-                f"- Median output tokens: {median(output_tokens):.1f}",
-                f"- Total input tokens: {sum(input_tokens)}",
-                f"- Total output tokens: {sum(output_tokens)}",
-                "",
-            ]
-        )
-
-    if failures:
-        lines.extend(["## Failures", ""])
-        for row in failures:
-            lines.append(
-                f"- `{row.get('context_id')}`: {row.get('error_message', 'unknown error')}"
-            )
-        lines.append("")
-
-    REPORT_MD.write_text("\n".join(lines), encoding="utf-8")
-
-
 def final_validation(
-    pilot_rows: list[dict[str, str]], output_rows: list[dict[str, Any]]
+    sample_rows: list[dict[str, str]], output_rows: list[dict[str, Any]]
 ) -> None:
-    pilot_context_ids = {row["context_id"] for row in pilot_rows}
+    sample_context_ids = {row["context_id"] for row in sample_rows}
     successes = [row for row in output_rows if row.get("api_request_status") == "success"]
     generated_context_ids = [row["context_id"] for row in successes]
 
@@ -499,7 +419,7 @@ def final_validation(
         "successful_generations_eq_1500": len(successes) == SAMPLE_SIZE,
         "unique_context_ids_eq_1500": len(set(generated_context_ids)) == SAMPLE_SIZE,
         "one_generation_per_context": len(generated_context_ids) == len(set(generated_context_ids)),
-        "all_contexts_from_sample": set(generated_context_ids) == pilot_context_ids,
+        "all_contexts_from_sample": set(generated_context_ids) == sample_context_ids,
         "zero_missing_generated_text": all(
             str(row.get("generated_doctor_turn", "")).strip() for row in successes
         ),
