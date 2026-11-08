@@ -6,10 +6,10 @@ from pathlib import Path
 
 import pandas as pd
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parents[1]
 A1_PATH = ROOT / "annotation" / "annotator1.xlsx"
 A2_PATH = ROOT / "annotation" / "annotator2.xlsx"
-FROZEN = ROOT / "final_1500_TRULY_FROZEN.csv"
+FROZEN = ROOT / "data" / "final_1500_TRULY_FROZEN.csv"
 OUT_XLSX = ROOT / "annotation" / "annotation_mastery_150.xlsx"
 OUT_CSV = ROOT / "annotation" / "annotation_mastery_150_wide.csv"
 
@@ -36,12 +36,12 @@ KIT_COLS = [
 ]
 
 MODEL_FILES = {
-    "Gemini": ROOT / "." / "final_Gemini_1500_NEXT_TURN_V1.csv",
-    "Claude": ROOT / "final_Claude_1500_NEXT_TURN_V1.csv",
-    "GPT": ROOT / "." / "final_GPT_1500_NEXT_TURN_V1.csv",
-    "Qwen": ROOT / "final_Qwen_1500_NEXT_TURN_V1.csv",
-    "MedGemma": ROOT / "." / "final_MedGemma_1500_NEXT_TURN_V1.csv",
-    "MedLlama": ROOT / "." / "final_MedLlama_1500_NEXT_TURN_V1.csv",
+    "Gemini": ROOT / "data" / "final_Gemini_1500_NEXT_TURN_V1.csv",
+    "Claude": ROOT / "data" / "final_Claude_1500_NEXT_TURN_V1.csv",
+    "GPT": ROOT / "data" / "final_GPT_1500_NEXT_TURN_V1.csv",
+    "Qwen": ROOT / "data" / "final_Qwen_1500_NEXT_TURN_V1.csv",
+    "MedGemma": ROOT / "data" / "final_MedGemma_1500_NEXT_TURN_V1.csv",
+    "MedLlama": ROOT / "data" / "final_MedLlama_1500_NEXT_TURN_V1.csv",
 }
 SOURCE_ORDER = ["Human", "Gemini", "Claude", "GPT", "Qwen", "MedGemma", "MedLlama"]
 

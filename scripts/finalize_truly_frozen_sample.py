@@ -11,11 +11,11 @@ from statistics import mean, median, pstdev
 
 import sample_final_1500_v2 as qc
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parents[1]
 REVIEWED_AUDIT = ROOT / "final_eligibility_audit_for_review.csv"
 INPUT_FROZEN = ROOT / "final_1500_FROZEN.csv"
 INPUT_CHARACTERISTICS = ROOT / "candidate_characteristics_v3.csv"
-OUTPUT_FROZEN = ROOT / "final_1500_TRULY_FROZEN.csv"
+OUTPUT_FROZEN = ROOT / "data" / "final_1500_TRULY_FROZEN.csv"
 OUTPUT_REPLACEMENT_AUDIT = ROOT / "final_replacement_audit_completed.csv"
 OUTPUT_REPORT = ROOT / "final_frozen_validation_report.md"
 

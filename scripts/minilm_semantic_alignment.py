@@ -21,7 +21,7 @@ features "alone (no text embeddings)".
 
 Run where huggingface.co is reachable:
     pip install "sentence-transformers>=3,<7" pandas numpy
-    python minilm_semantic_alignment.py --data_dir /path/to/csvs --out_dir ./out
+    python scripts/minilm_semantic_alignment.py
 """
 
 import argparse
@@ -62,8 +62,8 @@ def nu(text):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--data_dir", default=".")
-    ap.add_argument("--out_dir", default="./out")
+    ap.add_argument("--data_dir", default=os.path.join(os.path.dirname(__file__), "..", "data"))
+    ap.add_argument("--out_dir", default=os.path.join(os.path.dirname(__file__), "..", "out"))
     ap.add_argument("--model", default="all-MiniLM-L6-v2")
     ap.add_argument("--drop_deepseek", action="store_true",
                     help="exclude the DeepSeek file (not in the paper draft)")

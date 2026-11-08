@@ -12,7 +12,7 @@ from statistics import mean, median, pstdev
 
 import analyze_candidate_turns_v2 as v2
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parents[1]
 INPUT_CSV = ROOT / "all_candidate_turns.csv"
 OUTPUT_CHARACTERISTICS = ROOT / "candidate_characteristics_v3.csv"
 OUTPUT_REPORT = ROOT / "candidate_analysis_report_v3.md"

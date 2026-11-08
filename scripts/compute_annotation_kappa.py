@@ -9,15 +9,15 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import cohen_kappa_score, confusion_matrix
 
-ROOT = Path(__file__).resolve().parent
-sys.path.insert(0, str(ROOT))
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from analyze_candidate_turns_v3 import classify_primary_turn_function  # noqa: E402
 from analyze_candidate_turns_v2 import classify_information_seeking  # noqa: E402
 
 A1_PATH = ROOT / "annotation" / "annotator1.xlsx"
 A2_PATH = ROOT / "annotation" / "annotator2.xlsx"
-FROZEN = ROOT / "final_1500_TRULY_FROZEN.csv"
+FROZEN = ROOT / "data" / "final_1500_TRULY_FROZEN.csv"
 CAND = ROOT / "candidate_characteristics_v3.csv"
 
 Q1C = "Q1: number of information requests"
@@ -160,15 +160,15 @@ def main() -> None:
     human_set = set(frozen["tn"].dropna())
 
     model_files = {
-        "Claude": ROOT / "final_Claude_1500_NEXT_TURN_V1.csv",
-        "Claude_recovered": ROOT / "final_Claude_1500_NEXT_TURN_V1.csv",
-        "Gemini": ROOT / "." / "final_Gemini_1500_NEXT_TURN_V1.csv",
-        "GPT": ROOT / "." / "final_GPT_1500_NEXT_TURN_V1.csv",
-        "MedGemma": ROOT / "." / "final_MedGemma_1500_NEXT_TURN_V1.csv",
-        "MedLlama": ROOT / "." / "final_MedLlama_1500_NEXT_TURN_V1.csv",
-        "Qwen36": ROOT / "final_Qwen_1500_NEXT_TURN_V1.csv",
-        "Qwen38": ROOT / "final_Qwen_1500_NEXT_TURN_V1.csv",
-        "DeepSeek": ROOT / "final_DeepSeek_1500_NEXT_TURN_V1.csv",
+        "Claude": ROOT / "data" / "final_Claude_1500_NEXT_TURN_V1.csv",
+        "Claude_recovered": ROOT / "data" / "final_Claude_1500_NEXT_TURN_V1.csv",
+        "Gemini": ROOT / "data" / "final_Gemini_1500_NEXT_TURN_V1.csv",
+        "GPT": ROOT / "data" / "final_GPT_1500_NEXT_TURN_V1.csv",
+        "MedGemma": ROOT / "data" / "final_MedGemma_1500_NEXT_TURN_V1.csv",
+        "MedLlama": ROOT / "data" / "final_MedLlama_1500_NEXT_TURN_V1.csv",
+        "Qwen36": ROOT / "data" / "final_Qwen_1500_NEXT_TURN_V1.csv",
+        "Qwen38": ROOT / "data" / "final_Qwen_1500_NEXT_TURN_V1.csv",
+        "DeepSeek": ROOT / "data" / "final_DeepSeek_1500_NEXT_TURN_V1.csv",
     }
     gen_sets: dict[str, set[str]] = {}
     for name, p in model_files.items():

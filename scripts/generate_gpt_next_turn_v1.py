@@ -24,7 +24,7 @@ from openai import (
     RateLimitError,
 )
 
-PROJECT_DIR = Path(__file__).resolve().parent
+PROJECT_DIR = Path(__file__).resolve().parents[1]
 
 PROMPT_VERSION = "NEXT_TURN_V1"
 EXPERIMENT_MODEL_ID = "gpt-5.6-sol"
@@ -48,11 +48,11 @@ CONVERSATION_HEADER = "CONVERSATION:{context}"
 
 PROMPT_TEMPLATE = f"{INSTRUCTIONS}\n{CONVERSATION_HEADER}"
 
-INPUT_SAMPLE = PROJECT_DIR / "final_1500_TRULY_FROZEN.csv"
-OUTPUT_CSV = PROJECT_DIR / "final_GPT_1500_NEXT_TURN_V1.csv"
-RAW_JSONL = PROJECT_DIR / "final_GPT_1500_NEXT_TURN_V1_raw.jsonl"
-REPORT_MD = PROJECT_DIR / "final_GPT_1500_NEXT_TURN_V1_report.md"
-CONFIG_JSON = PROJECT_DIR / "GPT_1500_NEXT_TURN_V1_config.json"
+INPUT_SAMPLE = PROJECT_DIR / "data" / "final_1500_TRULY_FROZEN.csv"
+OUTPUT_CSV = PROJECT_DIR / "data" / "final_GPT_1500_NEXT_TURN_V1.csv"
+RAW_JSONL = PROJECT_DIR / "data" / "final_GPT_1500_NEXT_TURN_V1_raw.jsonl"
+REPORT_MD = PROJECT_DIR / "out" / "final_GPT_1500_NEXT_TURN_V1_report.md"
+CONFIG_JSON = PROJECT_DIR / "config" / "GPT_1500_NEXT_TURN_V1_config.json"
 
 FORBIDDEN_PROMPT_MARKERS = [
     "human_doctor_target",

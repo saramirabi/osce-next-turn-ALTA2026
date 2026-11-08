@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from statistics import mean, median
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parents[1]
 TRANSCRIPT_DIR = (
     ROOT / "doctor-patient-consultation-dialogues" / "Data" / "Clean Transcripts"
 )
