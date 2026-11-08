@@ -5,3 +5,4 @@ __pycache__/
 *_raw.jsonl
 .DS_Store
 Thumbs.db
+annotation/
