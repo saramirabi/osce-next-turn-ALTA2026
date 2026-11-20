@@ -435,3 +435,11 @@ html[data-deck-theme="green"] {
 .reveal .paper .cols table.models.pos { font-size: 17px; }
 .reveal .paper .cols table.models.pos td,
 .reveal .paper .cols table.models.pos th { padding: 4px 6px; }
+
+/* Blue title card when the Blue (Original) template is active. White text
+   on deep navy and blue; the light blue only glows in the corner. */
+html[data-deck-theme="original"] {
+  --sd-7-bg: radial-gradient(ellipse 46% 60% at 100% 100%, rgb(181 216 226 / 0.75), transparent 100%),
+             linear-gradient(115deg, #14283b 0%, #1b467f 55%, #245ba6 100%);
+  --sd-7-ink: #ffffff;
+}
