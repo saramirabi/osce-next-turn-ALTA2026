@@ -13,11 +13,11 @@ format:
 
 ```{=html}
 <figure class="hero-photo" aria-hidden="true" style="position:absolute;top:232px;right:40px;width:340px;height:191px;margin:0;overflow:hidden;border-radius:14px"><img src="img/clinician-vs-ai.jpg" alt="" width="340" height="191" style="width:100%;height:100%;object-fit:cover;margin:0;max-width:none"></figure>
-<p class="iw-kicker">ALTA 2026 · Melbourne</p>
+<p class="iw-kicker">ALTA 2026</p>
 <div class="iw-rule" aria-hidden="true"></div>
 <p class="iw-sub">Recoverable pragmatic signatures of language models in clinical history-taking</p>
 <p class="iw-people">Sara Mirabi · Bahadorreza Ofoghi</p>
-<p class="iw-site">School of Information Technology, Deakin University · Code and data: <a href="https://github.com/saramirabi/osce-next-turn-ALTA2026">github.com/saramirabi/osce-next-turn-ALTA2026</a></p>
+<p class="iw-site">School of Information Technology, Deakin University</p>
 ```
 
 ::: {.notes}
