@@ -17,7 +17,7 @@ Keys: `S` speaker view with notes, `T` cycle templates (Green, Blue), `F` or the
 ## Edit and re-render
 
 - Slides: `slides/index.qmd` (one `##` heading per slide, notes in `::: {.notes}`).
-- Deck styles: `slides/paper.css` (colours come from template tokens).
+- Deck styles: `slides/paper-v3.css` (renamed when it changes, so browsers do not keep an old copy) (colours come from template tokens).
 - Templates and chrome: `_shared/` (`_shared/themes/green.scss` is the default).
 
 ```bash
