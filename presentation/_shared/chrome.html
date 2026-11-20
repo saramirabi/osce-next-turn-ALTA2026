@@ -1,0 +1,521 @@
+<script>
+(function () {
+  var PARTS = {
+    "slides": { label: "ALTA 2026 paper", anchor: "" }
+  };
+
+  /* Slide templates the picker offers. Each id is a file in _shared/themes/;
+     scripts/render-slides.sh compiles it to _site/_shared/themes/<id>.css.
+     The deck's own template (format.revealjs.theme) names itself in
+     --deck-theme and needs no extra stylesheet. */
+  var THEMES = [
+    { id: "green", label: "Green" },
+    { id: "original", label: "Original" },
+    { id: "nyfw-ss26", label: "NYFW SS26" }
+  ];
+  var THEME_KEY = "alta2026-paper-deck-theme";
+  var SITE_ROOT = "../";
+  var buildTheme = getComputedStyle(document.documentElement).getPropertyValue("--deck-theme").trim();
+  var themeLink = null;
+  var themeButtons = [];
+
+  function knownTheme(id) {
+    return THEMES.some(function (t) { return t.id === id; });
+  }
+
+  function storedTheme() {
+    try { return localStorage.getItem(THEME_KEY); } catch (e) { return null; }
+  }
+
+  function activeTheme() {
+    return document.documentElement.dataset.deckTheme || buildTheme;
+  }
+
+  function relayout() {
+    if (window.Reveal && Reveal.isReady && Reveal.isReady()) Reveal.layout();
+  }
+
+  function syncThemeButtons() {
+    var id = activeTheme();
+    themeButtons.forEach(function (btn) {
+      btn.setAttribute("aria-pressed", btn.dataset.theme === id ? "true" : "false");
+    });
+  }
+
+  function applyTheme(id, save) {
+    if (!knownTheme(id)) id = buildTheme;
+    var previous = themeLink;
+    themeLink = null;
+    if (id === buildTheme) {
+      if (previous) previous.remove();
+      relayout();
+    } else {
+      var link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = SITE_ROOT + "_shared/themes/" + id + ".css";
+      link.dataset.deckTheme = id;
+      link.addEventListener("load", function () {
+        if (previous) previous.remove();
+        relayout();
+      });
+      link.addEventListener("error", function () {
+        link.remove();
+        applyTheme(buildTheme, false);
+      });
+      document.head.append(link);
+      themeLink = link;
+    }
+    document.documentElement.dataset.deckTheme = id;
+    if (save) {
+      try { localStorage.setItem(THEME_KEY, id); } catch (e) {}
+    }
+    syncThemeButtons();
+  }
+
+  function cycleTheme() {
+    var i = THEMES.findIndex(function (t) { return t.id === activeTheme(); });
+    applyTheme(THEMES[(i + 1) % THEMES.length].id, true);
+  }
+
+  applyTheme(knownTheme(storedTheme()) ? storedTheme() : buildTheme, false);
+  window.addEventListener("storage", function (event) {
+    if (event.key === THEME_KEY) applyTheme(event.newValue, false);
+  });
+
+  function partInfo() {
+    var bits = location.pathname.split("/");
+    for (var i = 0; i < bits.length; i++) {
+      if (PARTS[bits[i]]) return PARTS[bits[i]];
+    }
+    return { label: "Presentation", anchor: "" };
+  }
+
+  function slideTitle(slide) {
+    var heading = slide.querySelector("h1, h2, h3");
+    if (!heading) return "Untitled slide";
+    return heading.textContent.replace(/\s+/g, " ").trim();
+  }
+
+  function slideText(slide) {
+    var clone = slide.cloneNode(true);
+    clone.querySelectorAll(".notes, aside.notes").forEach(function (n) { n.remove(); });
+    return clone.textContent.replace(/\s+/g, " ").trim();
+  }
+
+  function boot() {
+    if (!window.Reveal || typeof Reveal.on !== "function") {
+      setTimeout(boot, 40);
+      return;
+    }
+    if (Reveal.isReady && Reveal.isReady()) init();
+    else Reveal.on("ready", init);
+  }
+
+  function init() {
+    var part = partInfo();
+    var homeHref = "../index.html";
+    var partHref = "../index.html" + (part.anchor ? "#" + part.anchor : "");
+
+    var bar = document.createElement("header");
+    bar.className = "deck-topbar";
+    bar.innerHTML =
+      '<button type="button" class="deck-icon-btn" data-deck-menu aria-expanded="false" aria-controls="deck-drawer" aria-label="Open slide list">' +
+      '<span aria-hidden="true">&#9776;</span></button>' +
+      '<nav class="deck-crumbs" aria-label="Breadcrumb"></nav>' +
+      '<div class="deck-pager" aria-label="Slide navigation">' +
+      '<button type="button" data-dir="-1" aria-label="Previous slide">&#8249;</button>' +
+      '<span class="deck-count" data-deck-count>1 / 1</span>' +
+      '<button type="button" data-dir="1" aria-label="Next slide">&#8250;</button>' +
+      "</div>" +
+      '<div class="deck-theme" role="group" aria-label="Slide theme" title="Slide theme. Press T to cycle.">' +
+      THEMES.map(function (t) {
+        return '<button type="button" data-theme="' + t.id + '" aria-pressed="false">' + t.label + "</button>";
+      }).join("") +
+      "</div>" +
+      '<form class="deck-search" role="search">' +
+      '<label class="visually-hidden" for="deck-search-input" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Search this presentation</label>' +
+      '<input id="deck-search-input" type="search" placeholder="Search slides" autocomplete="off">' +
+      '<ul class="deck-results" hidden></ul>' +
+      "</form>";
+
+    var backdrop = document.createElement("div");
+    backdrop.className = "deck-backdrop";
+    backdrop.hidden = true;
+
+    var drawer = document.createElement("aside");
+    drawer.className = "deck-drawer";
+    drawer.id = "deck-drawer";
+    drawer.setAttribute("aria-label", "Slides");
+    drawer.innerHTML =
+      "<header><strong>" + part.label + "</strong>" +
+      '<button type="button" class="deck-icon-btn" data-deck-close aria-label="Close slide list">&times;</button></header>' +
+      "<ol></ol><footer>Left and right arrows move between slides. T changes the slide theme. Escape closes this list, then returns home.</footer>";
+
+    var footerNum = document.createElement("div");
+    footerNum.className = "deck-footer-num";
+
+    document.body.append(bar, backdrop, drawer, footerNum);
+
+    var crumbs = bar.querySelector(".deck-crumbs");
+    var countEl = bar.querySelector("[data-deck-count]");
+    var results = bar.querySelector(".deck-results");
+    var search = bar.querySelector("input");
+    var list = drawer.querySelector("ol");
+    var menuBtn = bar.querySelector("[data-deck-menu]");
+    themeButtons = Array.prototype.slice.call(bar.querySelectorAll("[data-theme]"));
+    themeButtons.forEach(function (btn) {
+      btn.addEventListener("click", function () { applyTheme(btn.dataset.theme, true); });
+    });
+    syncThemeButtons();
+    if (typeof Reveal.addKeyBinding === "function") {
+      Reveal.addKeyBinding({ keyCode: 84, key: "T", description: "Next slide theme" }, cycleTheme);
+    }
+    var catalog = [];
+    var activeResult = -1;
+
+    Reveal.getSlides().forEach(function (slide) {
+      var idx = Reveal.getIndices(slide);
+      catalog.push({
+        h: idx.h,
+        v: idx.v,
+        title: slideTitle(slide),
+        text: slideText(slide)
+      });
+    });
+
+    catalog.forEach(function (item, i) {
+      var li = document.createElement("li");
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.dataset.index = String(i);
+      btn.innerHTML = '<span class="num">' + (i + 1) + '</span><span>' + escapeHtml(item.title) + "</span>";
+      btn.addEventListener("click", function () {
+        Reveal.slide(item.h, item.v);
+        closeDrawer();
+      });
+      li.append(btn);
+      list.append(li);
+    });
+
+    function escapeHtml(value) {
+      return value.replace(/[&<>"']/g, function (ch) {
+        return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch];
+      });
+    }
+
+    function currentNumber() {
+      var past = typeof Reveal.getSlidePastCount === "function" ? Reveal.getSlidePastCount() : Reveal.getIndices().h;
+      return past + 1;
+    }
+
+    function stageText(slide) {
+      var title = slideTitle(slide);
+      var fragments = slide.querySelectorAll(".fragment");
+      if (!fragments.length) return title;
+      var f = Reveal.getIndices().f;
+      if (typeof f !== "number" || f < 0) return title;
+      var steps = new Set(Array.prototype.map.call(fragments, function (el) {
+        return el.getAttribute("data-fragment-index");
+      })).size;
+      return title + " · " + (f + 1) + "/" + steps;
+    }
+
+    function renderCrumbs() {
+      var n = currentNumber();
+      var total = catalog.length || 1;
+      var slide = Reveal.getCurrentSlide();
+      var label = countLabel(n, total);
+      countEl.textContent = label;
+      footerNum.textContent = label;
+      crumbs.innerHTML = "";
+      addCrumb(homeHref, "Home");
+      addSep();
+      addCrumb(partHref, part.label);
+      addSep();
+      var num = document.createElement("span");
+      num.textContent = String(n);
+      crumbs.append(num);
+      addSep();
+      var here = document.createElement("span");
+      here.className = "deck-here";
+      here.textContent = slide ? stageText(slide) : "";
+      crumbs.append(here);
+      list.querySelectorAll("button").forEach(function (btn, i) {
+        btn.classList.toggle("is-current", i === n - 1);
+      });
+    }
+
+    function countLabel(n, total) {
+      return n + " / " + total;
+    }
+
+    function addCrumb(href, text) {
+      var a = document.createElement("a");
+      a.href = href;
+      a.textContent = text;
+      crumbs.append(a);
+    }
+
+    function addSep() {
+      var s = document.createElement("span");
+      s.setAttribute("aria-hidden", "true");
+      s.textContent = "/";
+      crumbs.append(s);
+    }
+
+    function openDrawer() {
+      drawer.classList.add("is-open");
+      backdrop.hidden = false;
+      menuBtn.setAttribute("aria-expanded", "true");
+      var current = list.querySelector(".is-current");
+      if (current) current.focus();
+    }
+
+    function closeDrawer() {
+      drawer.classList.remove("is-open");
+      backdrop.hidden = true;
+      menuBtn.setAttribute("aria-expanded", "false");
+    }
+
+    function drawerOpen() {
+      return drawer.classList.contains("is-open");
+    }
+
+    function closeSearch() {
+      results.hidden = true;
+      results.innerHTML = "";
+      activeResult = -1;
+    }
+
+    function goResult(index) {
+      var item = catalog[index];
+      if (!item) return;
+      Reveal.slide(item.h, item.v);
+      closeSearch();
+      search.blur();
+    }
+
+    function showResults(query) {
+      var q = query.trim().toLowerCase();
+      results.innerHTML = "";
+      activeResult = -1;
+      if (!q) {
+        results.hidden = true;
+        return;
+      }
+      var hits = [];
+      catalog.forEach(function (item, i) {
+        var hay = (item.title + " " + item.text).toLowerCase();
+        if (hay.indexOf(q) !== -1) hits.push(i);
+      });
+      hits.slice(0, 12).forEach(function (i) {
+        var li = document.createElement("li");
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.innerHTML = escapeHtml(catalog[i].title) + "<small>Slide " + (i + 1) + "</small>";
+        btn.addEventListener("click", function () { goResult(i); });
+        li.append(btn);
+        results.append(li);
+      });
+      if (!hits.length) {
+        var empty = document.createElement("li");
+        empty.textContent = "No matching slides";
+        results.append(empty);
+      }
+      results.hidden = false;
+    }
+
+    menuBtn.addEventListener("click", function () {
+      if (drawerOpen()) closeDrawer();
+      else openDrawer();
+    });
+    drawer.querySelector("[data-deck-close]").addEventListener("click", closeDrawer);
+    backdrop.addEventListener("click", closeDrawer);
+
+    /* Decks chain into one talk. A link with data-next-deck on a deck's last
+       slide is followed when the presenter goes forward from the end; going
+       back from the first slide opens the deck named in PARTS[...].prev at its
+       last slide (?at=end). In the speaker view the slides are receiver
+       iframes, so the jump goes to the main deck window (the popup's opener),
+       and the keys arrive as Reveal "triggerKey" messages, not key events. */
+    var nextDeck = document.querySelector(".reveal .slides a[data-next-deck]");
+    var nextHref = nextDeck ? nextDeck.href : null;
+    var prevHref = part.prev ? new URL("../" + part.prev + "/?at=end", location.href).href : null;
+    var isReceiver = /receiver/i.test(location.search);
+    var FORWARD_CODES = [39, 40, 34, 78, 76, 74];
+    var BACK_CODES = [37, 38, 33, 80, 72, 75];
+
+    function atDeckEnd() {
+      return Reveal.isLastSlide() && !Reveal.availableFragments().next;
+    }
+
+    function atDeckStart() {
+      return Reveal.isFirstSlide() && !Reveal.availableFragments().prev;
+    }
+
+    function openDeck(href) {
+      var target = window;
+      if (isReceiver) {
+        try { target = window.parent.opener; } catch (e) { target = null; }
+      }
+      if (target) target.location.href = href;
+    }
+
+    /* Returns true when the step left this deck, so the caller skips Reveal. */
+    function chainStep(dir) {
+      if (dir > 0 && nextHref && atDeckEnd()) { openDeck(nextHref); return true; }
+      if (dir < 0 && prevHref && atDeckStart()) { openDeck(prevHref); return true; }
+      return false;
+    }
+
+    function keyDirection(code, shift) {
+      if (code === 32) return shift ? -1 : 1;
+      if (FORWARD_CODES.indexOf(code) !== -1) return 1;
+      if (BACK_CODES.indexOf(code) !== -1) return -1;
+      return 0;
+    }
+
+    bar.querySelectorAll("[data-dir]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var dir = btn.dataset.dir === "1" ? 1 : -1;
+        if (chainStep(dir)) return;
+        if (dir > 0) Reveal.next();
+        else Reveal.prev();
+      });
+    });
+
+    if (nextHref || prevHref) {
+      /* Capture on window runs before Reveal's own handlers, so the position
+         checked is the one before Reveal moves. */
+      window.addEventListener("keydown", function (event) {
+        if (event.metaKey || event.ctrlKey || event.altKey) return;
+        if (drawerOpen() || event.target.closest("input, textarea, select")) return;
+        var dir = keyDirection(event.keyCode, event.shiftKey);
+        if (dir && chainStep(dir)) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      }, true);
+      if (isReceiver) {
+        /* Reveal handles a triggerKey message before this listener sees it,
+           so check the position as it was before the key: the snapshot is
+           only refreshed after the current task. */
+        var before = { end: false, start: false };
+        var remember = function () {
+          setTimeout(function () { before = { end: atDeckEnd(), start: atDeckStart() }; }, 0);
+        };
+        ["slidechanged", "fragmentshown", "fragmenthidden"].forEach(function (name) { Reveal.on(name, remember); });
+        remember();
+        window.addEventListener("message", function (event) {
+          var data;
+          try { data = JSON.parse(event.data); } catch (e) { return; }
+          if (!data || data.method !== "triggerKey") return;
+          var dir = keyDirection(data.args && data.args[0], false);
+          if (dir > 0 && nextHref && before.end) openDeck(nextHref);
+          else if (dir < 0 && prevHref && before.start) openDeck(prevHref);
+        }, true);
+      }
+    }
+
+    /* Reveal's speaker view reconnects to a reloaded main window through its
+       heartbeat, but builds its slide previews only once, for the first deck.
+       After a hop, point its preview iframes at this deck. */
+    if (!isReceiver) {
+      window.addEventListener("message", function (event) {
+        var data;
+        try { data = JSON.parse(event.data); } catch (e) { return; }
+        if (!data || data.namespace !== "reveal-notes" || data.type !== "heartbeat") return;
+        try {
+          var frames = event.source.document.querySelectorAll("#current-slide iframe, #upcoming-slide iframe");
+          Array.prototype.forEach.call(frames, function (frame) {
+            var src = new URL(frame.getAttribute("src"), location.href);
+            if (src.pathname === location.pathname) return;
+            /* Reveal reads the build index only from an id hash, #/id/f. */
+            var at = Reveal.getIndices();
+            var id = Reveal.getCurrentSlide().id;
+            src.pathname = location.pathname;
+            src.hash = (id ? "#/" + id : "#/" + at.h + "/" + (at.v || 0)) + (at.f >= 0 ? "/" + at.f : "");
+            frame.setAttribute("src", src.href);
+          });
+        } catch (e) { /* not the speaker view, or another origin */ }
+      });
+    }
+
+    var params = new URLSearchParams(location.search);
+    if (params.get("at") === "end" && !isReceiver) {
+      params.delete("at");
+      var query = params.toString();
+      history.replaceState(null, "", location.pathname + (query ? "?" + query : "") + location.hash);
+      var slides = Reveal.getSlides();
+      var last = Reveal.getIndices(slides[slides.length - 1]);
+      Reveal.slide(last.h, last.v);
+      while (Reveal.availableFragments().next) Reveal.nextFragment();
+    }
+
+    search.addEventListener("input", function () { showResults(search.value); });
+    bar.querySelector("form").addEventListener("submit", function (event) {
+      event.preventDefault();
+      var buttons = results.querySelectorAll("button");
+      var pick = activeResult >= 0 ? buttons[activeResult] : buttons[0];
+      if (pick) pick.click();
+    });
+    search.addEventListener("keydown", function (event) {
+      var buttons = results.querySelectorAll("button");
+      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        event.preventDefault();
+        event.stopPropagation();
+        if (!buttons.length) return;
+        activeResult += event.key === "ArrowDown" ? 1 : -1;
+        if (activeResult < 0) activeResult = buttons.length - 1;
+        if (activeResult >= buttons.length) activeResult = 0;
+        buttons.forEach(function (btn, i) {
+          btn.setAttribute("aria-selected", i === activeResult ? "true" : "false");
+        });
+        buttons[activeResult].scrollIntoView({ block: "nearest" });
+      }
+    });
+
+    window.addEventListener("keydown", function (event) {
+      if (event.key !== "Escape") return;
+      if (drawerOpen()) {
+        event.preventDefault();
+        event.stopPropagation();
+        closeDrawer();
+        return;
+      }
+      if (!results.hidden) {
+        event.preventDefault();
+        event.stopPropagation();
+        closeSearch();
+        return;
+      }
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+      event.preventDefault();
+      event.stopPropagation();
+      /* sandbox build: Escape does not navigate away */
+    }, true);
+
+    var idleTimer;
+    function wake() {
+      document.documentElement.classList.remove("deck-idle");
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(function () {
+        document.documentElement.classList.add("deck-idle");
+      }, 1400);
+    }
+    document.addEventListener("mousemove", wake);
+    wake();
+
+    Reveal.on("slidechanged", renderCrumbs);
+    Reveal.on("fragmentshown", renderCrumbs);
+    Reveal.on("fragmenthidden", renderCrumbs);
+    renderCrumbs();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot);
+  } else {
+    boot();
+  }
+})();
+</script>

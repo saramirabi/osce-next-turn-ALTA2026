@@ -1,0 +1,478 @@
+---
+pagetitle: "ALTA 2026 · Same Context, Different Clinician"
+format:
+  revealjs:
+    css:
+      - ../_shared/chrome.css
+      - ../_shared/section-divider.css
+      - welcome.css
+      - paper.css
+---
+
+## Same Context, Different Clinician {#welcome .intro-slide .welcome-slide .paper-title .section-divider .part-title .sd-7 style="--deck-heading: var(--sd-on-ink); --deck-ink: var(--sd-on-ink); --deck-soft: var(--sd-on-ink); --deck-accent: var(--sd-on-ink); --deck-accent-strong: var(--sd-on-ink); --deck-line: var(--sd-on-ink); --deck-gradient: linear-gradient(var(--sd-on-ink), var(--sd-on-ink));"}
+
+```{=html}
+<p class="iw-kicker">ALTA 2026 · Melbourne</p>
+<div class="iw-rule" aria-hidden="true"></div>
+<p class="iw-sub">Recoverable pragmatic signatures of language models in clinical history-taking</p>
+<p class="iw-people">Sara Mirabi · Bahadorreza Ofoghi</p>
+<p class="iw-site">School of Information Technology, Deakin University · Code and data: <a href="https://github.com/saramirabi/osce-next-turn-ALTA2026">github.com/saramirabi/osce-next-turn-ALTA2026</a></p>
+```
+
+::: {.notes}
+**About this slide:** The paper asks a simple question. If you give a clinician and six language models exactly the same point in a consultation, how does each of them take the next turn? We are not asking whether the content is medically right. We are asking how each source organises the turn.
+
+**What to take away:** This is a talk about how models manage a conversation, not about what they know.
+
+**Presenter notes:**
+
+- TODO: add the session name and time from the ALTA 2026 programme once it is out.
+- One-line pitch if needed: "Same dialogue state, seven different clinicians, and you can tell them apart from how they talk."
+:::
+
+---
+
+## Evaluations check content, not conversation {#intro .paper}
+
+```{=html}
+<div class="cols">
+  <div>
+    <p class="lede">Clinical LLMs are mostly tested on whether answers are <b>medically reliable</b>. But history is built <b>turn by turn</b>: acknowledge, ask a focused follow-up, pace, decide when to move on.</p>
+    <div class="callout" style="margin-top:18px">Training says <b>one focused question at a time</b>. Models tend to talk at length. Do they fold several requests into one turn?</div>
+  </div>
+  <div>
+    <p class="hbar-title">A clinician spreads it out</p>
+    <div class="turn fragment"><span class="who">Clinician</span>Where exactly is the pain?</div>
+    <div class="turn fragment"><span class="who">Clinician</span>Does it spread anywhere?</div>
+    <div class="turn fragment"><span class="who">Clinician</span>Is it worse on exertion?</div>
+    <p class="hbar-title fragment" data-fragment-index="4" style="margin-top:14px">A model may bundle it</p>
+    <div class="turn fragment" data-fragment-index="4"><span class="who">Model</span><mark>Where exactly is the pain</mark>, <mark>does it spread anywhere</mark>, and <mark>is it worse on exertion</mark>?</div>
+  </div>
+</div>
+<p class="src slide-foot">Singhal et al. 2023; Tu et al. 2025; Silverman, Kurtz and Draper 2016 (Calgary-Cambridge); Laban et al. 2026. Chest-pain example from the paper's introduction.</p>
+```
+
+::: {.notes}
+**About this slide:** Most evaluation of clinical LLMs asks whether what they say is correct: medical QA, diagnostic accuracy, information-gathering completeness. But a consultation is an interaction, built one turn at a time. Communication training (Calgary-Cambridge) discourages compound questions, and models tend to be verbose, which suggests a hypothesis: models compress the interaction, folding into one turn what a clinician spreads over several.
+
+**What to take away:** We test the "models bundle more" intuition. The answer turns out to be "only some of them".
+
+**Presenter notes:**
+
+- Click through the three clinician turns, then reveal the bundled model turn.
+- The chest-pain example is the paper's own illustration, not a turn from the data.
+- Content-focused work: Med-PaLM and MultiMedQA (Singhal et al. 2023), AMIE (Tu et al. 2025), AgentClinic, MediQ, Johri et al. 2025. These ask whether a system reaches the right information; we ask how it organises the next turn.
+:::
+
+---
+
+## Same context, different clinician {#design .paper}
+
+```{=html}
+<div class="pipe">
+  <div class="box">
+    <h4>Shared context C<sub>i</sub></h4>
+    The full dialogue up to a point where the <b>clinician spoke next</b>, ending on the patient's last turn.
+  </div>
+  <div class="arrow" aria-hidden="true">→</div>
+  <div class="box key">
+    <h4>Seven sources</h4>
+    <ul>
+      <li>The real OSCE clinician</li>
+      <li>GPT, Gemini, Claude, Qwen</li>
+      <li>MedGemma, MedLlama</li>
+    </ul>
+  </div>
+  <div class="arrow" aria-hidden="true">→</div>
+  <div class="box">
+    <h4>One next turn each</h4>
+    Same minimal prompt, temperature 0. Scored with the same deterministic, model-independent measures.
+  </div>
+</div>
+<div class="tiles">
+  <div class="tile"><span class="n">272</span><span class="l">simulated OSCE consultations</span></div>
+  <div class="tile"><span class="n">11,573</span><span class="l">eligible history-taking targets (of 13,111)</span></div>
+  <div class="tile"><span class="n">1,500</span><span class="l">position-matched contexts: 544 early, 544 middle, 412 late</span></div>
+  <div class="tile"><span class="n">10,500</span><span class="l">turns scored (7 sources × 1,500)</span></div>
+</div>
+<div class="callout fragment" style="margin-top:22px">The clinician's turn is <b>one reasonable continuation</b>, a reference and not a gold standard.</div>
+<p class="src slide-foot">Data: Fareez et al. 2022, simulated patient-physician interviews (mostly respiratory and musculoskeletal). Sampling: dialogue-aware, position-stratified, fixed seed 42.</p>
+```
+
+::: {.notes}
+**About this slide:** The design is position-matched. We take points in real simulated OSCE consultations where a clinician spoke next. Every source sees exactly the same preceding dialogue, so any difference is in how they proceed, not in the situation they face.
+
+**What to take away:** Holding the dialogue state constant isolates how each source organises the next move. And the clinician is a reference, not the right answer.
+
+**Presenter notes:**
+
+- 13,111 candidate clinician turns follow a patient turn. A rule-based filter keeps those whose primary function is history-taking with at least two prior exchanges: 11,573.
+- 1,500 contexts, five or six per consultation: two early, two middle, one late, plus a sixth late target for 140 consultations.
+- 10,500 is simply seven sources times 1,500 contexts.
+- Models: gpt-5.6-sol, gemini-2.5-flash, claude-sonnet-4-6 (API); qwen3.6-35b-a3b, medgemma-27b-text, med-llama3-8b (local, LM Studio). Temperature 0, reasoning disabled or minimised, one generation per context.
+- The prompt gives only the conversation: no clinician turn, specialty, position or labels, and no instruction to be brief, ask one question or stay in history-taking. So moves into management are the model's own choice.
+- If asked: the eligibility filter is a preprocessing step, not a validated dialogue-act scheme, and it does not use punctuation, so elliptical turns like "Any fevers?" stay in.
+:::
+
+---
+
+## Measuring how a turn is organised {#measures .paper}
+
+```{=html}
+<div class="measures">
+  <div class="measure"><b>Expansion</b>Words and sentences per turn; words per information request.</div>
+  <div class="measure"><b>Request density</b>Deterministic counter of information requests, including coordinated questions.</div>
+  <div class="measure"><b>Bundling</b>Share of turns with two or more requests.</div>
+  <div class="measure"><b>Acknowledgement</b>Does the turn open with "OK", "I see", "right" and the like?</div>
+  <div class="measure"><b>Phase switch</b>Lexical cue of leaving history-taking for exam, diagnosis or management.</div>
+  <div class="measure"><b>Alignment</b>Overlap with the patient's words; embedding similarity (descriptive only).</div>
+</div>
+<div class="tiles three fragment" style="margin-top:22px">
+  <div class="tile"><span class="n">1,050</span><span class="l">turns blind-coded by humans to validate the measures</span></div>
+  <div class="tile"><span class="n">κ = .759</span><span class="l">human agreement on request count (double-coded subset)</span></div>
+  <div class="tile"><span class="n">κ = .751</span><span class="l">automatic phase switch vs human coding, all 1,050 turns</span></div>
+</div>
+<p class="src slide-foot">No generative model takes part in scoring, coding or filtering. Analysis: consultation-clustered GEE, clinician as reference.</p>
+```
+
+::: {.notes}
+**About this slide:** Every turn gets the same feature map, computed by one deterministic function applied to human and model turns alike. These capture observable interactional properties, not clinical correctness and not similarity to a gold answer.
+
+**What to take away:** The measures are simple, transparent and validated against blind human coding.
+
+**Presenter notes:**
+
+- Request counter: a sentence is a question if it ends in a question mark, opens with a wh-word or auxiliary, or takes an elliptical form like "Any...". Coordinated clauses that start a new wh-word or auxiliary add a request. "Arm, jaw or back" counts once; "where is the pain, does it spread" counts twice.
+- Against human counts the counter has high precision (.89) and lower recall (.67). Human coders count each item of a checklist ("any fever, chills, or cough?") separately, so the counter is conservative, especially for GPT (recall .47).
+- Discourse function κ = .773 between human coders; phase-switch accuracy is about .92.
+- Statistics: generalised estimating equations clustered by consultation; Gaussian for continuous features, Poisson for counts, binomial for binary features. Model-to-model comparisons are descriptive.
+:::
+
+---
+
+## Expansion is common; bundling is not {#expansion .paper}
+
+```{=html}
+<div class="cols">
+  <div>
+<p class="hbar-title">Mean words per turn</p>
+<div class="hbar">
+  <div class="row human"><span class="name">Human</span><span class="track"><span class="bar" style="display:block;width:31.0%"></span><span class="ref" style="left:31.0%"></span></span><span class="val">12.4 <small>ref.</small></span></div>
+  <div class="row "><span class="name">Gemini</span><span class="track"><span class="bar" style="display:block;width:26.0%"></span><span class="ref" style="left:31.0%"></span></span><span class="val">10.4 <small>−2.0</small></span></div>
+  <div class="row hi"><span class="name">Claude</span><span class="track"><span class="bar" style="display:block;width:52.0%"></span><span class="ref" style="left:31.0%"></span></span><span class="val">20.8 <small>+8.4</small></span></div>
+  <div class="row hi"><span class="name">GPT</span><span class="track"><span class="bar" style="display:block;width:56.8%"></span><span class="ref" style="left:31.0%"></span></span><span class="val">22.7 <small>+10.3</small></span></div>
+  <div class="row hi"><span class="name">Qwen</span><span class="track"><span class="bar" style="display:block;width:90.3%"></span><span class="ref" style="left:31.0%"></span></span><span class="val">36.1 <small>+23.7</small></span></div>
+  <div class="row hi"><span class="name">MedGemma</span><span class="track"><span class="bar" style="display:block;width:59.7%"></span><span class="ref" style="left:31.0%"></span></span><span class="val">23.9 <small>+11.5</small></span></div>
+  <div class="row "><span class="name">MedLlama</span><span class="track"><span class="bar" style="display:block;width:36.2%"></span><span class="ref" style="left:31.0%"></span></span><span class="val">14.5 <small>+2.1</small></span></div>
+</div>
+<p class="hbar-cap">Dashed line: the clinician (12.4 words). Small figures: GEE contrast in words against the clinician; all CIs exclude 0.</p>
+  </div>
+  <div>
+<p class="hbar-title">Turns with two or more information requests</p>
+<div class="hbar">
+  <div class="row human"><span class="name">Human</span><span class="track"><span class="bar" style="display:block;width:36.2%"></span><span class="ref" style="left:36.2%"></span></span><span class="val">14.5% <small>1.16/turn · RR ref.</small></span></div>
+  <div class="row "><span class="name">Gemini</span><span class="track"><span class="bar" style="display:block;width:22.7%"></span><span class="ref" style="left:36.2%"></span></span><span class="val">9.1% <small>1.06/turn · RR 0.91</small></span></div>
+  <div class="row hi"><span class="name">Claude</span><span class="track"><span class="bar" style="display:block;width:54.8%"></span><span class="ref" style="left:36.2%"></span></span><span class="val">21.9% <small>1.26/turn · RR 1.09</small></span></div>
+  <div class="row hi"><span class="name">GPT</span><span class="track"><span class="bar" style="display:block;width:94.8%"></span><span class="ref" style="left:36.2%"></span></span><span class="val">37.9% <small>1.40/turn · RR 1.21</small></span></div>
+  <div class="row "><span class="name">Qwen</span><span class="track"><span class="bar" style="display:block;width:29.8%"></span><span class="ref" style="left:36.2%"></span></span><span class="val">11.9% <small>1.11/turn · RR 0.95</small></span></div>
+  <div class="row "><span class="name">MedGemma</span><span class="track"><span class="bar" style="display:block;width:33.5%"></span><span class="ref" style="left:36.2%"></span></span><span class="val">13.4% <small>1.01/turn · RR 0.87</small></span></div>
+  <div class="row lo"><span class="name">MedLlama</span><span class="track"><span class="bar" style="display:block;width:9.2%"></span><span class="ref" style="left:36.2%"></span></span><span class="val">3.7% <small>0.29/turn · RR 0.25</small></span></div>
+</div>
+<p class="hbar-cap">Dashed line: the clinician (14.5%). RR: rate ratio for requests per turn against the clinician (consultation-clustered Poisson GEE).</p>
+  </div>
+</div>
+<div class="callout fragment" style="margin-top:6px;font-size:21px">Most models say more. Only <b>GPT</b> and, more modestly, <b>Claude</b> ask more per turn than the clinician. Blind human coding agrees; counting checklist items, GPT's excess grows to <b>RR 2.13</b>.</div>
+<p class="src slide-foot">Table 1 and Table 5. Consultation-clustered GEE, clinician as reference.</p>
+```
+
+::: {.notes}
+**About this slide:** Left: how much language each source spends. Qwen is nearly three times the clinician's length; GPT, MedGemma and Claude about 1.7 to 1.9 times; Gemini is terser than the clinician. Right: the share of turns with two or more requests. The clinician is at 14.5%. GPT is the clear exception at 37.9% (1.40 requests per turn, RR 1.21), Claude more modestly at 21.9% (RR 1.09). Gemini, Qwen, MedGemma and MedLlama are below the clinician.
+
+**What to take away:** "LLMs bundle questions" is not a property of LLMs. It is a property of some models. What most models share is expansion.
+
+**Presenter notes:**
+
+- Length hides what the words do. Words per request: clinician 9.5, Gemini 9.0, MedGemma 11.8, Claude 13.3, GPT 14.0, Qwen 19.0. Qwen's extra length is elaboration around a request; GPT combines elaboration with more requests.
+- GPT's bundling is checklist style ("any fever, chills, sore throat, or cough?"). The counter counts that once, so it understates GPT; human coders count each item, which is why human coding gives RR 2.13.
+- Robustness: with one random target per consultation (272 contexts) the expansion ordering and GPT's request rate (RR 1.19) hold; Claude's smaller elevation does not (RR 1.03, CI [0.95, 1.11]). Respiratory cases only reproduce the request pattern (GPT 1.21, Claude 1.08).
+:::
+
+---
+
+## One context, seven next turns {#example .paper}
+
+```{=html}
+<div class="turn patient" style="max-width:560px;margin-left:auto"><span class="who">Patient (after a chest-pain history)</span>No.</div>
+<table class="same-ctx" style="margin-top:8px">
+  <tr class="human"><td class="src-name">Clinician</td><td>Alright, and then how about any rashes or skin changes?</td></tr>
+  <tr><td class="src-name">Gemini</td><td>OK. And have you had any recent travel?</td></tr>
+  <tr><td class="src-name">Claude</td><td>OK. And have you had any recent weight loss that you've noticed?</td></tr>
+  <tr><td class="src-name">GPT</td><td>Given the severity of your chest pain and shortness of breath, we need to assess this urgently. Before examining you, do you have any history of heart or lung problems, blood clots, high blood pressure, diabetes, or high cholesterol? <span class="tag">bundled checklist</span></td></tr>
+  <tr><td class="src-name">Qwen</td><td>Do you have any history of heart disease, high blood pressure, or high cholesterol?</td></tr>
+  <tr><td class="src-name">MedGemma</td><td>OK. So just to recap, you're a 39-year-old male presenting with sharp left-sided chest pain … Is that correct? <span class="tag">long recap</span></td></tr>
+  <tr><td class="src-name">MedLlama</td><td>I'd like to do a physical exam now. <span class="tag">leaves history-taking</span></td></tr>
+</table>
+<p class="src slide-foot">Table 10 (Appendix H). MedGemma's recap is shortened here; in full it runs to about 80 words.</p>
+```
+
+::: {.notes}
+**About this slide:** A single context continued by every source. After the patient answers "No", the clinician, Gemini and Claude each ask one short new question. GPT reframes towards urgency and asks a bundled risk-factor checklist. MedGemma gives a long recap before one confirmation question. MedLlama leaves history-taking for the examination.
+
+**What to take away:** The aggregate numbers on the previous slides are visible in a single turn.
+
+**Presenter notes:**
+
+- Read two or three of these aloud; the GPT and MedLlama rows make the point fastest.
+- MedGemma's full recap lists the presenting complaint, onset, character, severity and a long list of negatives before "Is that correct?".
+:::
+
+---
+
+## Acknowledgement and phase-switching {#ack-switch .paper}
+
+```{=html}
+<div class="cols">
+  <div>
+<p class="hbar-title">Turns that open by acknowledging the patient</p>
+<div class="hbar">
+  <div class="row human"><span class="name">Human</span><span class="track"><span class="bar" style="display:block;width:70.3%"></span><span class="ref" style="left:70.3%"></span></span><span class="val">70.3%</span></div>
+  <div class="row hi"><span class="name">Gemini</span><span class="track"><span class="bar" style="display:block;width:90.9%"></span><span class="ref" style="left:70.3%"></span></span><span class="val">90.9%</span></div>
+  <div class="row hi"><span class="name">Claude</span><span class="track"><span class="bar" style="display:block;width:79.8%"></span><span class="ref" style="left:70.3%"></span></span><span class="val">79.8%</span></div>
+  <div class="row lo"><span class="name">GPT</span><span class="track"><span class="bar" style="display:block;width:33.0%"></span><span class="ref" style="left:70.3%"></span></span><span class="val">33.0%</span></div>
+  <div class="row "><span class="name">Qwen</span><span class="track"><span class="bar" style="display:block;width:68.5%"></span><span class="ref" style="left:70.3%"></span></span><span class="val">68.5%</span></div>
+  <div class="row hi"><span class="name">MedGemma</span><span class="track"><span class="bar" style="display:block;width:96.5%"></span><span class="ref" style="left:70.3%"></span></span><span class="val">96.5%</span></div>
+  <div class="row lo"><span class="name">MedLlama</span><span class="track"><span class="bar" style="display:block;width:22.9%"></span><span class="ref" style="left:70.3%"></span></span><span class="val">22.9%</span></div>
+</div>
+<p class="hbar-cap">Dashed line: the clinician (70.3%).</p>
+  </div>
+  <div>
+<p class="hbar-title">Turns that leave history-taking</p>
+<div class="hbar">
+  <div class="row human"><span class="name">Human</span><span class="track"><span class="bar" style="display:block;width:0.6%"></span><span class="ref" style="left:0.2%"></span></span><span class="val">0.1%</span></div>
+  <div class="row lo"><span class="name">Gemini</span><span class="track"><span class="bar" style="display:block;width:0.6%"></span><span class="ref" style="left:0.2%"></span></span><span class="val">0.2%</span></div>
+  <div class="row lo"><span class="name">Claude</span><span class="track"><span class="bar" style="display:block;width:1.5%"></span><span class="ref" style="left:0.2%"></span></span><span class="val">0.9%</span></div>
+  <div class="row lo"><span class="name">GPT</span><span class="track"><span class="bar" style="display:block;width:3.0%"></span><span class="ref" style="left:0.2%"></span></span><span class="val">1.8%</span></div>
+  <div class="row hi"><span class="name">Qwen</span><span class="track"><span class="bar" style="display:block;width:25.5%"></span><span class="ref" style="left:0.2%"></span></span><span class="val">15.3%</span></div>
+  <div class="row lo"><span class="name">MedGemma</span><span class="track"><span class="bar" style="display:block;width:5.2%"></span><span class="ref" style="left:0.2%"></span></span><span class="val">3.1%</span></div>
+  <div class="row hi"><span class="name">MedLlama</span><span class="track"><span class="bar" style="display:block;width:87.5%"></span><span class="ref" style="left:0.2%"></span></span><span class="val">52.5%</span></div>
+</div>
+<p class="hbar-cap">Clinician rate is low partly by design: its targets were filtered as history-taking.</p>
+  </div>
+</div>
+<p class="src slide-foot">Table 1. Acknowledgement: leading-token match against a fixed lexicon. Phase switch: fixed cue lexicon, κ = .751 with human coding.</p>
+```
+
+::: {.notes}
+**About this slide:** The clinician opens by acknowledging the patient in about 70% of turns. MedGemma and Gemini do so more often, Claude slightly more. GPT does so in only a third of turns and typically goes straight to a question. Phase-switching is rare for the clinician and most models, but reaches 15.3% for Qwen and 52.5% for MedLlama.
+
+**What to take away:** Acknowledgement is one of the most consistent differences between models. Phase-switching is pronounced in some and almost absent in others.
+
+**Presenter notes:**
+
+- Odds ratios for acknowledgement against the clinician: MedGemma 11.8, Gemini 4.21, Claude 1.67, Qwen 0.92 (n.s.), GPT 0.21, MedLlama 0.13.
+- The two high switchers differ: Qwen fluently moves into interpretation and management ("I suspect a significant ligament injury... I need to do a physical exam"), while MedLlama's switching is tied to task-compliance failure.
+- Acknowledgement is a surface marker, not a measure of empathy.
+:::
+
+---
+
+## No shared "LLM style": each source has its own profile {#profiles .paper}
+
+```{=html}
+<div class="cols wide-left">
+  <div>
+<table class="heat">
+<tr><th></th><th>Words</th><th>Info-req.</th><th>Multi-q.</th><th>Ack.</th><th>Phase switch</th><th>Patient overlap</th></tr>
+<tr><th class="rowh">Human</th><td class="" style="background:color-mix(in srgb, var(--series-a) 36%, var(--deck-paper))">-0.9</td><td class="" style="background:color-mix(in srgb, var(--series-b) 12%, var(--deck-paper))">+0.3</td><td class="" style="background:color-mix(in srgb, var(--series-a) 4%, var(--deck-paper))">-0.1</td><td class="" style="background:color-mix(in srgb, var(--series-b) 8%, var(--deck-paper))">+0.2</td><td class="" style="background:color-mix(in srgb, var(--series-a) 20%, var(--deck-paper))">-0.5</td><td class="" style="background:color-mix(in srgb, var(--series-a) 4%, var(--deck-paper))">-0.1</td></tr>
+<tr><th class="rowh">Gemini</th><td class="" style="background:color-mix(in srgb, var(--series-a) 44%, var(--deck-paper))">-1.1</td><td class="" style="background:color-mix(in srgb, var(--series-b) 4%, var(--deck-paper))">+0.1</td><td class="" style="background:color-mix(in srgb, var(--series-a) 24%, var(--deck-paper))">-0.6</td><td class="" style="background:color-mix(in srgb, var(--series-b) 36%, var(--deck-paper))">+0.9</td><td class="" style="background:color-mix(in srgb, var(--series-a) 20%, var(--deck-paper))">-0.5</td><td class="" style="background:color-mix(in srgb, var(--series-a) 4%, var(--deck-paper))">-0.1</td></tr>
+<tr><th class="rowh">Claude</th><td class="" style="background:color-mix(in srgb, var(--series-b) 4%, var(--deck-paper))">+0.1</td><td class="" style="background:color-mix(in srgb, var(--series-b) 24%, var(--deck-paper))">+0.6</td><td class="" style="background:color-mix(in srgb, var(--series-b) 20%, var(--deck-paper))">+0.5</td><td class="" style="background:color-mix(in srgb, var(--series-b) 20%, var(--deck-paper))">+0.5</td><td class="" style="background:color-mix(in srgb, var(--series-a) 20%, var(--deck-paper))">-0.5</td><td class="" style="background:color-mix(in srgb, var(--series-b) 20%, var(--deck-paper))">+0.5</td></tr>
+<tr><th class="rowh">GPT</th><td class="" style="background:color-mix(in srgb, var(--series-b) 12%, var(--deck-paper))">+0.3</td><td class="" style="background:color-mix(in srgb, var(--series-b) 40%, var(--deck-paper))">+1.0</td><td class="on-dark" style="background:color-mix(in srgb, var(--series-b) 80%, var(--deck-paper))">+2.0</td><td class="" style="background:color-mix(in srgb, var(--series-a) 48%, var(--deck-paper))">-1.2</td><td class="" style="background:color-mix(in srgb, var(--series-a) 20%, var(--deck-paper))">-0.5</td><td class="" style="background:color-mix(in srgb, var(--series-a) 12%, var(--deck-paper))">-0.3</td></tr>
+<tr><th class="rowh">Qwen</th><td class="on-dark" style="background:color-mix(in srgb, var(--series-b) 72%, var(--deck-paper))">+1.8</td><td class="" style="background:color-mix(in srgb, var(--series-b) 8%, var(--deck-paper))">+0.2</td><td class="" style="background:color-mix(in srgb, var(--series-a) 16%, var(--deck-paper))">-0.4</td><td class="" style="background:color-mix(in srgb, var(--series-b) 4%, var(--deck-paper))">+0.1</td><td class="" style="background:color-mix(in srgb, var(--series-b) 8%, var(--deck-paper))">+0.2</td><td class="" style="background:color-mix(in srgb, var(--series-b) 44%, var(--deck-paper))">+1.1</td></tr>
+<tr><th class="rowh">MedGemma</th><td class="" style="background:color-mix(in srgb, var(--series-b) 16%, var(--deck-paper))">+0.4</td><td class="" style="background:color-mix(in srgb, var(--series-a) 4%, var(--deck-paper))">-0.1</td><td class="" style="background:color-mix(in srgb, var(--series-a) 8%, var(--deck-paper))">-0.2</td><td class="" style="background:color-mix(in srgb, var(--series-b) 44%, var(--deck-paper))">+1.1</td><td class="" style="background:color-mix(in srgb, var(--series-a) 16%, var(--deck-paper))">-0.4</td><td class="" style="background:color-mix(in srgb, var(--series-b) 32%, var(--deck-paper))">+0.8</td></tr>
+<tr><th class="rowh">MedLlama</th><td class="" style="background:color-mix(in srgb, var(--series-a) 24%, var(--deck-paper))">-0.6</td><td class="on-dark" style="background:color-mix(in srgb, var(--series-a) 84%, var(--deck-paper))">-2.1</td><td class="" style="background:color-mix(in srgb, var(--series-a) 44%, var(--deck-paper))">-1.1</td><td class="on-dark" style="background:color-mix(in srgb, var(--series-a) 60%, var(--deck-paper))">-1.5</td><td class="on-dark" style="background:color-mix(in srgb, var(--series-b) 88%, var(--deck-paper))">+2.2</td><td class="on-dark" style="background:color-mix(in srgb, var(--series-a) 76%, var(--deck-paper))">-1.9</td></tr>
+</table>
+<p class="heat-legend"><span><i style="background:var(--series-b)"></i>above the mean of the seven sources</span><span><i style="background:var(--series-a)"></i>below it</span><span>values are z-scores across sources</span></p>
+  </div>
+  <div style="padding-top:20px">
+    <ul class="tight" style="font-size:22px">
+      <li><b>Clinician:</b> short, mostly one request</li>
+      <li><b>Gemini:</b> short, highly acknowledging</li>
+      <li><b>Claude:</b> long, acknowledging, moderately dense</li>
+      <li><b>GPT:</b> long, most bundling, rarely acknowledges</li>
+      <li><b>Qwen:</b> longest, often moves to management</li>
+      <li><b>MedGemma:</b> long, highly acknowledging</li>
+      <li><b>MedLlama:</b> outlier on most axes</li>
+    </ul>
+  </div>
+</div>
+<p class="src slide-foot">Figure 1: standardised pragmatic profiles, z-scored across the seven sources.</p>
+```
+
+::: {.notes}
+**About this slide:** Putting the measures together, each source occupies a distinct region. The clinician is short and mostly asks one request per turn. Gemini is short and acknowledging. Claude is long, acknowledging and moderately request-dense. GPT is long, the most bundling, and notably unacknowledging. Qwen is the longest and often moves into interpretation and management. MedGemma is long and highly acknowledging. MedLlama is an outlier on most axes.
+
+**What to take away:** The sources do not collapse into one style within this feature space.
+
+**Presenter notes:**
+
+- Purple cells are above the mean of the seven sources, blue cells below; the darker the cell, the further from the mean.
+- GPT's multi-question z of +2.0 and MedLlama's phase-switch z of +2.2 are the two strongest cells.
+:::
+
+---
+
+## Signatures are recoverable from pragmatics alone {#recovery .paper}
+
+```{=html}
+<div class="cols wide-right" style="grid-template-columns: 1fr 1.45fr">
+  <div>
+    <div class="tiles" style="grid-template-columns:1fr 1fr;margin-top:6px">
+      <div class="tile"><span class="n">0.49</span><span class="l">macro-F1, seven-way logistic regression</span></div>
+      <div class="tile"><span class="n">0.14</span><span class="l">chance (1/7)</span></div>
+      <div class="tile"><span class="n">0.45</span><span class="l">without MedLlama (chance 0.17)</span></div>
+      <div class="tile"><span class="n">0.67</span><span class="l">balanced acc., clinician vs any model</span></div>
+    </div>
+    <p class="lede fragment" style="font-size:22px;margin-top:18px">Not just length: dropping length features gives 0.36, length alone 0.29. The signal is <b>multi-dimensional</b>.</p>
+  </div>
+  <div>
+<table class="heat cm">
+<tr><th class="rowh">true ↓ · predicted →</th><th>Human</th><th>Gemini</th><th>Claude</th><th>GPT</th><th>Qwen</th><th>MedGemma</th><th>MedLlama</th></tr>
+<tr><th class="rowh">Human</th><td class="diag" style="background:color-mix(in srgb, var(--series-b) 36%, var(--deck-paper))">31</td><td class="" style="background:color-mix(in srgb, var(--series-b) 29%, var(--deck-paper))">25</td><td class="" style="background:color-mix(in srgb, var(--series-b) 22%, var(--deck-paper))">19</td><td class="" style="background:color-mix(in srgb, var(--series-b) 12%, var(--deck-paper))">10</td><td class="" style="background:color-mix(in srgb, var(--series-b) 5%, var(--deck-paper))">4</td><td class="" style="background:color-mix(in srgb, var(--series-b) 13%, var(--deck-paper))">11</td><td class="" style="background:color-mix(in srgb, var(--series-b) 2%, var(--deck-paper))">2</td></tr>
+<tr><th class="rowh">Gemini</th><td class="" style="background:color-mix(in srgb, var(--series-b) 20%, var(--deck-paper))">17</td><td class="on-dark diag" style="background:color-mix(in srgb, var(--series-b) 78%, var(--deck-paper))">67</td><td class="" style="background:color-mix(in srgb, var(--series-b) 7%, var(--deck-paper))">6</td><td class="" style="background:color-mix(in srgb, var(--series-b) 1%, var(--deck-paper))">1</td><td class="" style="background:color-mix(in srgb, var(--series-b) 1%, var(--deck-paper))">1</td><td class="" style="background:color-mix(in srgb, var(--series-b) 7%, var(--deck-paper))">6</td><td class="" style="background:color-mix(in srgb, var(--series-b) 2%, var(--deck-paper))">2</td></tr>
+<tr><th class="rowh">Claude</th><td class="" style="background:color-mix(in srgb, var(--series-b) 17%, var(--deck-paper))">15</td><td class="" style="background:color-mix(in srgb, var(--series-b) 7%, var(--deck-paper))">6</td><td class="on-dark diag" style="background:color-mix(in srgb, var(--series-b) 57%, var(--deck-paper))">49</td><td class="" style="background:color-mix(in srgb, var(--series-b) 17%, var(--deck-paper))">15</td><td class="" style="background:color-mix(in srgb, var(--series-b) 5%, var(--deck-paper))">4</td><td class="" style="background:color-mix(in srgb, var(--series-b) 13%, var(--deck-paper))">11</td><td class="" style="background:color-mix(in srgb, var(--series-b) 0%, var(--deck-paper))">0</td></tr>
+<tr><th class="rowh">GPT</th><td class="" style="background:color-mix(in srgb, var(--series-b) 2%, var(--deck-paper))">2</td><td class="" style="background:color-mix(in srgb, var(--series-b) 7%, var(--deck-paper))">6</td><td class="" style="background:color-mix(in srgb, var(--series-b) 3%, var(--deck-paper))">3</td><td class="on-dark diag" style="background:color-mix(in srgb, var(--series-b) 72%, var(--deck-paper))">62</td><td class="" style="background:color-mix(in srgb, var(--series-b) 7%, var(--deck-paper))">6</td><td class="" style="background:color-mix(in srgb, var(--series-b) 22%, var(--deck-paper))">19</td><td class="" style="background:color-mix(in srgb, var(--series-b) 1%, var(--deck-paper))">1</td></tr>
+<tr><th class="rowh">Qwen</th><td class="" style="background:color-mix(in srgb, var(--series-b) 6%, var(--deck-paper))">5</td><td class="" style="background:color-mix(in srgb, var(--series-b) 17%, var(--deck-paper))">15</td><td class="" style="background:color-mix(in srgb, var(--series-b) 6%, var(--deck-paper))">5</td><td class="" style="background:color-mix(in srgb, var(--series-b) 27%, var(--deck-paper))">23</td><td class="diag" style="background:color-mix(in srgb, var(--series-b) 38%, var(--deck-paper))">33</td><td class="" style="background:color-mix(in srgb, var(--series-b) 20%, var(--deck-paper))">17</td><td class="" style="background:color-mix(in srgb, var(--series-b) 2%, var(--deck-paper))">2</td></tr>
+<tr><th class="rowh">MedGemma</th><td class="" style="background:color-mix(in srgb, var(--series-b) 22%, var(--deck-paper))">19</td><td class="" style="background:color-mix(in srgb, var(--series-b) 17%, var(--deck-paper))">15</td><td class="" style="background:color-mix(in srgb, var(--series-b) 27%, var(--deck-paper))">23</td><td class="" style="background:color-mix(in srgb, var(--series-b) 2%, var(--deck-paper))">2</td><td class="" style="background:color-mix(in srgb, var(--series-b) 10%, var(--deck-paper))">9</td><td class="diag" style="background:color-mix(in srgb, var(--series-b) 31%, var(--deck-paper))">27</td><td class="" style="background:color-mix(in srgb, var(--series-b) 5%, var(--deck-paper))">4</td></tr>
+<tr><th class="rowh">MedLlama</th><td class="" style="background:color-mix(in srgb, var(--series-b) 2%, var(--deck-paper))">2</td><td class="" style="background:color-mix(in srgb, var(--series-b) 6%, var(--deck-paper))">5</td><td class="" style="background:color-mix(in srgb, var(--series-b) 2%, var(--deck-paper))">2</td><td class="" style="background:color-mix(in srgb, var(--series-b) 5%, var(--deck-paper))">4</td><td class="" style="background:color-mix(in srgb, var(--series-b) 6%, var(--deck-paper))">5</td><td class="" style="background:color-mix(in srgb, var(--series-b) 9%, var(--deck-paper))">8</td><td class="on-dark diag" style="background:color-mix(in srgb, var(--series-b) 85%, var(--deck-paper))">73</td></tr>
+</table>
+    <p class="hbar-cap">Row-normalised confusion matrix (%). Outlined: correct source. Consultation-grouped 5-fold CV, no text embeddings.</p>
+  </div>
+</div>
+<p class="src slide-foot">Section 4.5, Figure 2, Table 11. Random forest: 0.51 macro-F1.</p>
+```
+
+::: {.notes}
+**About this slide:** If the differences are real signatures, you should be able to tell which source produced a turn from its pragmatic features alone. A multinomial logistic regression, with folds split by consultation and no text embeddings, reaches 0.49 macro-F1 against a chance level of 0.14. MedLlama, GPT and Gemini are the most distinctive. The clinician and MedGemma are the hardest to recover, and they are confused mostly with Gemini, Claude and each other.
+
+**What to take away:** Model identity is recoverable from how the turn is organised, and it is not just one confound like length.
+
+**Presenter notes:**
+
+- Per-class F1: MedLlama 0.79, GPT 0.57, Gemini 0.56, Claude 0.47, Qwen 0.40, clinician 0.32, MedGemma 0.27.
+- Ablations: minus length 0.36, minus acknowledgement 0.42, minus phase 0.48; question or request features alone 0.22.
+- Separating each model from the clinician: hardest for MedGemma, Claude and Gemini (0.67 to 0.71 balanced accuracy), then Qwen (0.74), easiest for GPT and MedLlama (0.82 and 0.89).
+- Recoverability means distinctiveness, not quality. Being confused with the clinician is resemblance on these axes, not better communication.
+:::
+
+---
+
+## Fine-tuning is not compliance; gaps grow late {#compliance .paper}
+
+```{=html}
+<div class="cols">
+  <div>
+<p class="hbar-title">Turns with no information request</p>
+<div class="hbar">
+  <div class="row human"><span class="name">Human</span><span class="track"><span class="bar" style="display:block;width:2.0%"></span><span class="ref" style="left:2.0%"></span></span><span class="val">1.6% <small>malformed 0.0%</small></span></div>
+  <div class="row lo"><span class="name">Gemini</span><span class="track"><span class="bar" style="display:block;width:5.3%"></span><span class="ref" style="left:2.0%"></span></span><span class="val">4.2% <small>malformed 0.0%</small></span></div>
+  <div class="row lo"><span class="name">Claude</span><span class="track"><span class="bar" style="display:block;width:1.2%"></span><span class="ref" style="left:2.0%"></span></span><span class="val">1.0% <small>malformed 0.0%</small></span></div>
+  <div class="row lo"><span class="name">GPT</span><span class="track"><span class="bar" style="display:block;width:3.6%"></span><span class="ref" style="left:2.0%"></span></span><span class="val">2.9% <small>malformed 0.0%</small></span></div>
+  <div class="row lo"><span class="name">Qwen</span><span class="track"><span class="bar" style="display:block;width:3.4%"></span><span class="ref" style="left:2.0%"></span></span><span class="val">2.7% <small>malformed 1.7%</small></span></div>
+  <div class="row hi"><span class="name">MedGemma</span><span class="track"><span class="bar" style="display:block;width:19.1%"></span><span class="ref" style="left:2.0%"></span></span><span class="val">15.3% <small>malformed 0.1%</small></span></div>
+  <div class="row hi"><span class="name">MedLlama</span><span class="track"><span class="bar" style="display:block;width:95.5%"></span><span class="ref" style="left:2.0%"></span></span><span class="val">76.4% <small>malformed 7.5%</small></span></div>
+</div>
+<p class="hbar-cap">Malformed: hallucinated multi-turn exchange or trailing scaffolding (deterministic flags, Appendix D).</p>
+    <p class="lede" style="font-size:21px;margin-top:10px"><b>MedLlama</b>'s "low bundling" and phase-switching are mostly a <b>task-compliance failure</b>, not a style.</p>
+  </div>
+  <div class="fragment">
+    <p class="hbar-title">Mean words per turn, early to late</p>
+<table class="models pos">
+<tr><th>Source</th><th>Early</th><th>Middle</th><th>Late</th><th>Change</th></tr>
+<tr class="human"><td><b>Human</b></td><td><span class="mini" style="display:inline-block;height:14px;width:21px;background:var(--series-a);margin-right:8px;vertical-align:middle"></span>13.7</td><td><span class="mini" style="display:inline-block;height:14px;width:17px;background:var(--series-a);margin-right:8px;vertical-align:middle"></span>11.1</td><td><span class="mini" style="display:inline-block;height:14px;width:19px;background:var(--series-a);margin-right:8px;vertical-align:middle"></span>12.4</td><td>-1.3</td></tr>
+<tr><td><b>Gemini</b></td><td><span class="mini" style="display:inline-block;height:14px;width:17px;background:var(--series-b-mid);margin-right:8px;vertical-align:middle"></span>11.3</td><td><span class="mini" style="display:inline-block;height:14px;width:15px;background:var(--series-b-mid);margin-right:8px;vertical-align:middle"></span>9.8</td><td><span class="mini" style="display:inline-block;height:14px;width:15px;background:var(--series-b-mid);margin-right:8px;vertical-align:middle"></span>9.9</td><td>-1.4</td></tr>
+<tr><td><b>Claude</b></td><td><span class="mini" style="display:inline-block;height:14px;width:33px;background:var(--series-b-mid);margin-right:8px;vertical-align:middle"></span>21.4</td><td><span class="mini" style="display:inline-block;height:14px;width:26px;background:var(--series-b-mid);margin-right:8px;vertical-align:middle"></span>17.1</td><td><span class="mini" style="display:inline-block;height:14px;width:38px;background:var(--series-b-mid);margin-right:8px;vertical-align:middle"></span>24.8</td><td>+3.4</td></tr>
+<tr><td><b>GPT</b></td><td><span class="mini" style="display:inline-block;height:14px;width:32px;background:var(--series-b);margin-right:8px;vertical-align:middle"></span>20.5</td><td><span class="mini" style="display:inline-block;height:14px;width:34px;background:var(--series-b);margin-right:8px;vertical-align:middle"></span>22.2</td><td><span class="mini" style="display:inline-block;height:14px;width:40px;background:var(--series-b);margin-right:8px;vertical-align:middle"></span>26.2</td><td>+5.7</td></tr>
+<tr><td><b>Qwen</b></td><td><span class="mini" style="display:inline-block;height:14px;width:40px;background:var(--series-b);margin-right:8px;vertical-align:middle"></span>26.1</td><td><span class="mini" style="display:inline-block;height:14px;width:53px;background:var(--series-b);margin-right:8px;vertical-align:middle"></span>34.7</td><td><span class="mini" style="display:inline-block;height:14px;width:78px;background:var(--series-b);margin-right:8px;vertical-align:middle"></span>51.0</td><td>+24.9</td></tr>
+<tr><td><b>MedGemma</b></td><td><span class="mini" style="display:inline-block;height:14px;width:27px;background:var(--series-b);margin-right:8px;vertical-align:middle"></span>17.8</td><td><span class="mini" style="display:inline-block;height:14px;width:34px;background:var(--series-b);margin-right:8px;vertical-align:middle"></span>22.4</td><td><span class="mini" style="display:inline-block;height:14px;width:52px;background:var(--series-b);margin-right:8px;vertical-align:middle"></span>33.9</td><td>+16.1</td></tr>
+<tr><td><b>MedLlama</b></td><td><span class="mini" style="display:inline-block;height:14px;width:21px;background:var(--series-b-mid);margin-right:8px;vertical-align:middle"></span>13.5</td><td><span class="mini" style="display:inline-block;height:14px;width:21px;background:var(--series-b-mid);margin-right:8px;vertical-align:middle"></span>13.8</td><td><span class="mini" style="display:inline-block;height:14px;width:26px;background:var(--series-b-mid);margin-right:8px;vertical-align:middle"></span>16.8</td><td>+3.3</td></tr>
+</table>
+    <p class="lede" style="font-size:21px;margin-top:10px">Qwen, MedGemma and GPT lengthen as the history grows; the clinician does not. Early snapshots <b>understate</b> divergence.</p>
+  </div>
+</div>
+<p class="src slide-foot">Tables 2 and 8. GPT × position: +4.3 words (middle), +7.1 (late), both p &lt; 10<sup>−7</sup>; other trends descriptive.</p>
+```
+
+::: {.notes}
+**About this slide:** Left: task compliance, reported separately from pragmatics. Human, Gemini, GPT and Claude turns are always well-formed. MedLlama is malformed in 7.5% of turns and asks nothing in 76.4%. MedGemma is fluent and acknowledging but recap-heavy, with no request in 15.3% of turns. Right: the human-model gap is not constant. Qwen, MedGemma and GPT lengthen from early to late; MedGemma's requests fall from 1.26 to 0.77 over the same span, so its late growth is elaboration, not questions.
+
+**What to take away:** Medical fine-tuning did not confer clinician-like interaction, so screen for compliance before reading a profile as a style. And evaluations that sample only the opening of a consultation can miss how far models drift.
+
+**Presenter notes:**
+
+- Medical fine-tuning usually targets question answering (Singhal et al. 2023); consultation management is a separate competence (Tu et al. 2025).
+- Position modelled as continuous confirms the widening GPT gap (p < 10^−17), so it is not a binning artefact.
+- Links to Laban et al. 2026: performance can degrade as exchanges lengthen.
+:::
+
+---
+
+## Takeaways {#takeaways .paper}
+
+```{=html}
+<div class="cols wide-left">
+  <ol class="takeaways">
+    <li class="fragment"><b>No shared LLM style.</b> Under identical dialogue states, pragmatic signatures are recoverable well above chance.</li>
+    <li class="fragment"><b>Bundling is not universal.</b> Models differ more in expansion and acknowledgement.</li>
+    <li class="fragment"><b>Divergence grows with context.</b> Several models drift further from the clinician later on.</li>
+    <li class="fragment"><b>Medical fine-tuning is not interaction competence.</b> Check compliance first.</li>
+  </ol>
+  <div class="limits">
+    <p class="hbar-title">Limits and next steps</p>
+    <ul class="tight">
+      <li>Simulated OSCE, mostly respiratory and musculoskeletal</li>
+      <li>Transcribed speech vs written text</li>
+      <li>One temperature-0 generation, specific configurations</li>
+      <li>Acknowledgement is a surface marker, not empathy</li>
+      <li><b>Next:</b> real consultations, more specialties, personas and framing</li>
+    </ul>
+  </div>
+</div>
+```
+
+::: {.notes}
+**About this slide:** Four points. Models facing the same dialogue state organise their next turn differently, and we can recover who wrote a turn from pragmatics alone. The bundling intuition holds only for some models. Some differences grow as history accumulates. Medical specialisation did not confer clinician-like interaction.
+
+**What to take away:** Clinical LLMs should not be treated as one behavioural class or judged on content quality alone. Evaluating how they manage the conversation matters as much as what they say.
+
+**Presenter notes:**
+
+- Limitations in full: clinician turns are reasonable, not optimal, communication; only clinician targets were filtered as history-taking, so their low phase-switching is partly by design; the request counter understates checklist bundling; results do not isolate architecture or fine-tuning.
+- Next steps from the paper: real consultations across more specialties, robustness across generation settings, refined interaction measures, and whether signatures are stable or shift with framing (personality questionnaires, contrasting clinical personas across dialogue positions).
+- Practical angle: low acknowledgement (GPT) or early phase-switching (Qwen, MedLlama) can be screened for or targeted by prompting.
+:::
+
+---
+
+## Thank you {#questions .intro-slide .welcome-slide .paper-title .section-divider .part-title .sd-7 style="--deck-heading: var(--sd-on-ink); --deck-ink: var(--sd-on-ink); --deck-soft: var(--sd-on-ink); --deck-accent: var(--sd-on-ink); --deck-accent-strong: var(--sd-on-ink); --deck-line: var(--sd-on-ink); --deck-gradient: linear-gradient(var(--sd-on-ink), var(--sd-on-ink));"}
+
+```{=html}
+<p class="iw-kicker">Questions welcome</p>
+<div class="iw-rule" aria-hidden="true"></div>
+<p class="iw-sub">Same context, different clinician: models organise the next turn in their own, recoverable ways.</p>
+<p class="iw-people">Sara Mirabi · s222496341@deakin.edu.au<br>Bahadorreza Ofoghi · b.ofoghi@deakin.edu.au</p>
+<p class="iw-site">Code and data: <a href="https://github.com/saramirabi/osce-next-turn-ALTA2026">github.com/saramirabi/osce-next-turn-ALTA2026</a> · Dataset: Fareez et al. 2022 (CC BY 4.0), no real patient data</p>
+```
+
+::: {.notes}
+**About this slide:** Thank you. Happy to take questions.
+
+**What to take away:** The one-sentence summary and where to find the code and data.
+
+**Presenter notes:**
+
+- Likely questions and short answers:
+  - "Is the clinician the right answer?" No. It is one reasonable continuation; resemblance to it is not a quality claim.
+  - "Is this just length?" No. Without length features recovery is still 0.36 macro-F1 against 0.14 chance.
+  - "Would a different prompt change it?" Possibly; signatures describe these prompts, checkpoints and settings. Testing framing and personas is future work.
+  - "Why not use an LLM judge?" All scoring is deterministic and model-independent, so no model grades another, and every number is reproducible from the released code.
+:::

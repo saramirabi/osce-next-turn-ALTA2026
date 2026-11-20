@@ -1,0 +1,32 @@
+# Sandbox build of the ALTA 2026 paper talk. Local only: nothing here is
+# pushed or published. Reveal options and slide chrome copied from the
+# ALTA 2026 Tutorial 2 site (tdszyman/alta2026-evaluating-ai-agents) so the
+# deck looks and behaves the same.
+
+project:
+  type: default
+  resources:
+    - _shared/fonts/**
+
+format:
+  revealjs:
+    theme:
+      - default
+      - _shared/themes/green.scss
+      - _shared/slides.scss
+    css: _shared/chrome.css
+    include-after-body: _shared/chrome.html
+    slide-number: false
+    hash: true
+    hash-type: title
+    transition: fade
+    navigation-mode: linear
+    controls: true
+    controls-layout: edges
+    progress: true
+    keyboard: true
+    overview: true
+    chalkboard: false
+    margin: 0.12
+    width: 1280
+    height: 720

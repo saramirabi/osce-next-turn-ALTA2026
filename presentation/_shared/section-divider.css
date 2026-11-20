@@ -1,0 +1,194 @@
+/* Section dividers and part title slides: a large rounded card of colour.
+   Use on a level-1 heading: # 2. Title {.section-divider .sd-1}
+   Variants .sd-1 to .sd-7 each have their own gradient; no variant means .sd-1.
+   Assigned: .sd-1 and .sd-2 Part 1 section dividers; .sd-3 to .sd-6 the Part 1 to 4
+   title slides; .sd-7 the Intro title slide. Pick a new number for any new use.
+   Every title slide (Intro and Parts) adds .part-title, which also shows the
+   ALTA 2026 logo on a white chip at the top right. A part title slide adds a .pt-meta block:
+     ::: {.pt-meta}
+     [Part 1]{.pt-part} [Presenter name]{.pt-presenter}
+     :::
+   A deck opts in by listing ../../_shared/section-divider.css in format.revealjs.css.
+   Each --sd-n-ink is the text colour checked against the gradient behind the text. */
+
+:root {
+  /* Canva: stops sampled from the gradient cards on canva.com/en_au. White text throughout. Each slide's text sits on its darker stops; the lighter
+     stops that fall under 4.5:1 with white (teal, sky, coral, lavender) are corner glows. */
+  /* .sd-1 violet to magenta: the Video and Magic Layers cards. */
+  --sd-1-bg: radial-gradient(circle at 92% 12%, rgb(234 57 255 / 0.55), transparent 34%),
+             linear-gradient(125deg, #902cff 0%, #902cff 40%, #cd04c7 100%);
+  --sd-1-ink: #ffffff;
+  /* .sd-2 magenta to red, coral corner: the Magic Layers and Magic Eraser cards. */
+  --sd-2-bg: radial-gradient(circle at 100% 100%, rgb(255 115 71 / 0.9), transparent 34%),
+             linear-gradient(150deg, #cd04c7 0%, #cd04c7 25%, #eb2139 100%);
+  --sd-2-ink: #ffffff;
+  /* .sd-3 violet to blue, aqua corner: the Visual Suite card. */
+  --sd-3-bg: radial-gradient(circle at 100% 100%, rgb(169 233 248 / 0.75), transparent 30%),
+             linear-gradient(160deg, #902cff 0%, #3868d9 62%, #2585c7 100%);
+  --sd-3-ink: #ffffff;
+  /* .sd-4 green: the "Try Canva with your favourite apps" card. */
+  --sd-4-bg: radial-gradient(circle at 100% 100%, rgb(26 150 42 / 0.9), transparent 30%),
+             linear-gradient(160deg, #008636 0%, #008636 100%);
+  --sd-4-ink: #ffffff;
+  /* .sd-5 indigo to lavender: the Canva Enterprise card. */
+  --sd-5-bg: radial-gradient(circle at 100% 100%, rgb(177 181 253 / 0.8), transparent 32%),
+             linear-gradient(160deg, #362ab9 0%, #474cef 85%);
+  --sd-5-ink: #ffffff;
+  /* .sd-6 teal to aqua: the Barbie card. Its #009bb1 teal is 3.3:1 with white, so the
+     text sits on the same teal deepened to #007285, and the sampled teal and aqua glow. */
+  --sd-6-bg: radial-gradient(circle at 100% 100%, rgb(92 203 220 / 0.9), transparent 24%),
+             radial-gradient(circle at 100% 100%, rgb(0 155 177 / 0.95), transparent 34%),
+             linear-gradient(160deg, #007285 0%, #007285 100%);
+  --sd-6-ink: #ffffff;
+  /* .sd-7 violet to indigo to teal: the "Start designing with Canva" banner, mirrored
+     so the text sits on violet and indigo and the banner's teal end glows bottom right. */
+  --sd-7-bg: radial-gradient(ellipse 46% 60% at 100% 100%, rgb(1 194 205 / 0.95), transparent 100%),
+             radial-gradient(ellipse 40% 55% at 100% 70%, rgb(51 113 230 / 0.7), transparent 100%),
+             linear-gradient(100deg, #7b2ae9 0%, #5c31f9 60%, #5c31f9 100%);
+  --sd-7-ink: #ffffff;
+}
+
+html[data-deck-theme="nyfw-ss26"] {
+  /* NYFW SS26: alexandrite to marina, deep marina to amaranth, deep marina, pale alexandrite,
+     lava falls, amaranth, plum ink to amaranth. Muskmelon, tea rose and acacia are too light
+     for white text, so they only glow in a corner. */
+  --sd-1-bg: linear-gradient(125deg, #00646c 0%, #00646c 35%, #4f85c3 100%);
+  --sd-1-ink: #ffffff;
+  --sd-2-bg: radial-gradient(circle at 100% 100%, rgb(222 113 118 / 0.85), transparent 30%),
+             linear-gradient(125deg, #2d5a8f 0%, #6e3c55 100%);
+  --sd-2-ink: #ffffff;
+  --sd-3-bg: linear-gradient(125deg, #2d5a8f 0%, #3f70aa 100%);
+  --sd-3-ink: #ffffff;
+  --sd-4-bg: linear-gradient(125deg, #b3d0d3 0%, #e0ecee 100%);
+  --sd-4-ink: #371e2a;
+  --sd-5-bg: linear-gradient(125deg, #9a2b31 0%, #b84a50 100%);
+  --sd-5-ink: #ffffff;
+  --sd-6-bg: linear-gradient(125deg, #6e3c55 0%, #8f5a6c 100%);
+  --sd-6-ink: #ffffff;
+  --sd-7-bg: radial-gradient(ellipse 42% 55% at 100% 100%, rgb(218 205 101 / 0.8), transparent 100%),
+             radial-gradient(ellipse 36% 50% at 100% 70%, rgb(238 147 92 / 0.6), transparent 100%),
+             linear-gradient(110deg, #371e2a 0%, #6e3c55 100%);
+  --sd-7-ink: #ffffff;
+}
+
+html[data-deck-theme="original"] {
+  /* Original: its blues and greys only, dark and pale in turn. */
+  --sd-1-bg: linear-gradient(125deg, #1b467f 0%, #245ba6 100%);
+  --sd-1-ink: #ffffff;
+  --sd-2-bg: linear-gradient(125deg, #d6e4f5 0%, #e3ecf8 55%, #eff3f5 100%);
+  --sd-2-ink: #14283b;
+  --sd-3-bg: linear-gradient(125deg, #14283b 0%, #1b467f 100%);
+  --sd-3-ink: #ffffff;
+  --sd-4-bg: linear-gradient(125deg, #eff3f5 0%, #b8c8d1 100%);
+  --sd-4-ink: #14283b;
+  --sd-5-bg: linear-gradient(125deg, #3d4f61 0%, #526476 100%);
+  --sd-5-ink: #ffffff;
+  --sd-6-bg: linear-gradient(125deg, #0b1622 0%, #14283b 100%);
+  --sd-6-ink: #ffffff;
+  --sd-7-bg: linear-gradient(125deg, #ffffff 0%, #d6e4f5 100%);
+  --sd-7-ink: #1b467f;
+}
+
+html:has(.reveal .slides section.present.section-divider) {
+  --sd-on-bg: var(--sd-1-bg);
+  --sd-on-ink: var(--sd-1-ink);
+}
+
+html:has(.reveal .slides section.present.section-divider.sd-2) {
+  --sd-on-bg: var(--sd-2-bg);
+  --sd-on-ink: var(--sd-2-ink);
+}
+
+html:has(.reveal .slides section.present.section-divider.sd-3) {
+  --sd-on-bg: var(--sd-3-bg);
+  --sd-on-ink: var(--sd-3-ink);
+}
+
+html:has(.reveal .slides section.present.section-divider.sd-4) {
+  --sd-on-bg: var(--sd-4-bg);
+  --sd-on-ink: var(--sd-4-ink);
+}
+
+html:has(.reveal .slides section.present.section-divider.sd-5) {
+  --sd-on-bg: var(--sd-5-bg);
+  --sd-on-ink: var(--sd-5-ink);
+}
+
+html:has(.reveal .slides section.present.section-divider.sd-6) {
+  --sd-on-bg: var(--sd-6-bg);
+  --sd-on-ink: var(--sd-6-ink);
+}
+
+html:has(.reveal .slides section.present.section-divider.sd-7) {
+  --sd-on-bg: var(--sd-7-bg);
+  --sd-on-ink: var(--sd-7-ink);
+}
+
+/* The card is drawn on Reveal's full-screen background layer, so it is the same size
+   in every deck. Its margins keep it clear of the top bar, the edge arrows, the menu
+   button and the page number, which all keep their normal colours. */
+html:has(.reveal .slides section.present.section-divider) .reveal .backgrounds::before {
+  content: "";
+  position: absolute;
+  top: calc(var(--deck-bar, 42px) + 18px);
+  right: 36px;
+  bottom: 50px;
+  left: 36px;
+  background: var(--sd-on-bg);
+  border-radius: 32px;
+}
+
+.reveal .slides section.section-divider h1 {
+  max-width: 13.5em;
+  margin: 0;
+  font-size: 80px;
+  font-weight: 800;
+  line-height: 1.06;
+  letter-spacing: -0.025em;
+  color: var(--sd-on-ink, var(--deck-heading));
+}
+
+.reveal .slides section.part-title h1 {
+  font-size: 88px;
+}
+
+.reveal .slides section.part-title .pt-meta p {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin: 40px 0 0;
+  font-family: var(--deck-font-sans);
+  color: var(--sd-on-ink, var(--deck-ink));
+}
+
+.reveal .slides section.part-title .pt-part {
+  padding: 4px 18px;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 2px solid currentColor;
+  border-radius: 999px;
+}
+
+.reveal .slides section.part-title .pt-presenter {
+  font-size: 32px;
+  font-weight: 600;
+}
+
+/* ALTA 2026 logo on title slides, inside the card's top-right corner. It sits on
+   Reveal's full-screen background layer, so it is in the same place in every deck.
+   The chip keeps the logo's own colours legible on every gradient.
+   Source and permission: _shared/README.md. */
+html:has(.reveal .slides section.present.part-title) .reveal .backgrounds::after {
+  content: "";
+  position: absolute;
+  top: calc(var(--deck-bar, 42px) + 42px);
+  right: 60px;
+  width: 116px;
+  height: 92px;
+  background: #ffffff url("alta-2026-logo.png") center / 88px auto no-repeat;
+  border: 1px solid rgb(15 16 21 / 0.08);
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgb(15 16 21 / 0.14);
+}

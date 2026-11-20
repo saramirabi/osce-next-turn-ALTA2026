@@ -1,0 +1,139 @@
+/* Slide template: Green (Fern).
+   Made for the ALTA 2026 paper talk, with a green palette. Contrast on white: primary 5.4:1,
+   deep green 8.0:1, slate 7.1:1. Mint, lime and teal are fills and edges
+   only. Type stays Plus Jakarta Sans (bundled). */
+
+/*-- scss:defaults --*/
+
+$g-turquoise: #19b39a;  // teal: start of the brand gradient (fill only)
+$g-violet: #0a5c40;     // deep green: under white text
+$g-purple: #127a4a;     // green: end of the brand gradient
+$g-primary: #0e7a52;    // primary green (5.4:1 on white)
+$g-primary-hover: #0b6646; // darker
+$g-primary-press: #0a5c40; // deep green (8.0:1)
+$g-lavender: #d7f0e2;   // mint tint
+$g-ink: #0f1a15;        // near-black with a green cast
+$g-ink-soft: #15241d;   // secondary text, used at 70%
+$g-slate: #2f4a3d;      // borders, used at low opacity
+$g-surface: #f1f6f3;    // quiet fill
+$g-blue: #3b5b75;       // slate blue: the clinician / reference series
+$g-blue-ink: #2b475e;   // slate blue, darker
+$g-blue-tint: #d9e3ec;  // slate tint
+$g-magenta: #8bc34a;    // lime (fill only)
+$g-orange: #e39b17;     // amber (fill only)
+$g-amber-ink: #8a5300;  // amber text
+$g-amber-tint: #fbe3b5; // amber tint
+$g-red: #c62828;        // critical
+$g-red-tint: #ffd6d6;   // critical tint
+$g-green: #127a4a;      // positive
+
+$t-font-sans: "Plus Jakarta Sans", "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+$t-font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+$t-heading-weight: 600;
+
+$t-paper: #ffffff;
+$t-bg: $t-paper;
+$t-surface: $g-surface;
+$t-line: mix($g-slate, $t-paper, 30%);   // derived
+$t-ink: $g-ink;
+$t-soft: mix($g-ink-soft, $t-paper, 70%); // secondary text at 70% on white
+$t-heading: $t-ink;
+$t-accent: $g-primary;
+$t-accent-strong: $g-primary-press;
+$t-accent-tint: mix($g-lavender, $t-paper, 55%); // derived
+$t-accent-ring: $g-lavender;
+
+$font-family-sans-serif: $t-font-sans;
+$font-family-monospace: $t-font-mono;
+$presentation-heading-font: $t-font-sans;
+$presentation-heading-color: $t-heading;
+$presentation-heading-font-weight: $t-heading-weight;
+$presentation-slide-text-align: left;
+$presentation-title-slide-text-align: left;
+$body-bg: $t-bg;
+$body-color: $t-ink;
+$link-color: $t-accent;
+$link-color-hover: $t-accent-strong;
+$selection-bg: $g-lavender;
+$selection-color: $t-ink;
+$code-block-bg: $t-surface;
+
+/*-- scss:rules --*/
+
+:root {
+  --deck-theme: green;
+  --deck-font-sans: "Plus Jakarta Sans", "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  --deck-font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --deck-heading-weight: #{$t-heading-weight};
+  --deck-heading-tracking: -0.015em;
+
+  --deck-bg: #{$t-bg};
+  --deck-paper: #{$t-paper};
+  --deck-surface: #{$t-surface};
+  --deck-line: #{$t-line};
+  --deck-ink: #{$t-ink};
+  --deck-soft: #{$t-soft};
+  --deck-heading: #{$t-heading};
+  --deck-accent: #{$t-accent};
+  --deck-accent-strong: #{$t-accent-strong};
+  --deck-accent-tint: #{$t-accent-tint};
+  --deck-accent-ring: #{$t-accent-ring};
+  --deck-on-accent: #{$t-paper};
+  --deck-scrim: #{rgba($t-ink, 0.4)};
+  --deck-selection: #{$g-lavender};
+
+  /* Gradients: --deck-gradient paints marks with no text on them (progress
+     bar, title rule); --deck-accent-fill sits under white text. */
+  --deck-gradient: linear-gradient(90deg, #{$g-turquoise}, #{$g-purple});
+  --deck-accent-fill: linear-gradient(98deg, #{$g-violet}, #{$g-primary-hover});
+  --deck-title-rule: 6px;
+
+  /* Chat roles. Turquoise, magenta and orange are below 4.5:1 on white, so
+     they colour fills and edges only; text beside them is ink or a darker
+     green value. */
+  --chat-edge-width: 3px;
+  --chat-system-bg: #{$t-paper};
+  --chat-system-edge: #{$t-line};
+  --chat-user-bg: #{mix($g-blue-tint, $t-paper, 70%)};
+  --chat-user-edge: #{$g-blue};
+  --chat-user-label: #{$g-blue-ink};
+  --chat-agent-bg: #{mix($g-turquoise, $t-paper, 12%)};
+  --chat-agent-edge: #{$g-turquoise};
+  --chat-agent-label: #{mix($g-turquoise, $t-ink, 55%)};
+  --chat-call-bg: transparent;
+  --chat-thought-bg: transparent;
+  --chat-thought-edge: #{mix($g-primary, $t-paper, 60%)};
+  --chat-thought-line: dashed;
+  --chat-thought-ink: #{$t-soft};
+  --chat-thought-style: italic;
+  --chat-action-bg: #{mix($g-magenta, $t-paper, 14%)};
+  --chat-action-edge: #{$g-magenta};
+  --chat-observation-bg: #{$t-paper};
+  --chat-observation-edge: #{$g-magenta};
+  --chat-judge-edge: #{$g-purple};
+  --chat-judge-label: #{$g-primary-hover};
+  --chat-judge-box-edge: #{$g-purple};
+  --chat-judge-head-bg: linear-gradient(90deg, #{$g-violet}, #{$g-purple});
+  --chat-judge-head-ink: #{$t-paper};
+  --chat-judge-tint: #{mix($g-lavender, $t-paper, 40%)};
+
+  /* Judge verdicts */
+  --verdict-pass: #{$g-green};
+  --verdict-warn: #{$g-orange};
+  --verdict-warn-ink: #{$g-amber-ink};
+  --verdict-warn-tint: #{mix($g-amber-tint, $t-paper, 25%)};
+  --verdict-fail: #{$g-red};
+  --verdict-fail-tint: #{mix($g-red-tint, $t-paper, 35%)};
+  --verdict-on: #{$t-paper};
+
+  /* Two-category figures: predictive / complicated (a), generative / complex (b) */
+  --series-a: #{$g-blue};
+  --series-a-ink: #{$g-blue-ink};
+  --series-a-tint: #{mix($g-blue-tint, $t-paper, 45%)};
+  --series-b: #{$g-primary};
+  --series-b-ink: #{$g-primary-hover};
+  --series-b-mid: #{mix($g-primary, $t-paper, 55%)};
+  --series-b-tint: #{mix($g-lavender, $t-paper, 50%)};
+  --figure-ink: #{$t-soft};
+  --figure-muted: #{$t-soft};
+}
