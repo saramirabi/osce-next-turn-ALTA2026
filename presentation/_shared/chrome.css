@@ -426,3 +426,13 @@ html.deck-idle .reveal .controls .navigate-right:focus {
 .reveal .slides a.next-deck:hover {
   text-decoration: underline;
 }
+
+/* Full-screen button at the right end of the top bar. */
+.deck-topbar .deck-fs {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.deck-topbar .deck-fs[hidden] { display: none; }
+@media print { .deck-topbar .deck-fs { display: none; } }

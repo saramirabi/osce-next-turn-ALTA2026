@@ -13,6 +13,8 @@
     { id: "original", label: "Blue" }
   ];
   var THEME_KEY = "alta2026-paper-deck-theme";
+  var FS_EXPAND = '<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5V3h4.5M12.5 3H17v4.5M17 12.5V17h-4.5M7.5 17H3v-4.5"/></svg>';
+  var FS_SHRINK = '<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 3v4.5H3M17 7.5h-4.5V3M12.5 17v-4.5H17M3 12.5h4.5V17"/></svg>';
   var SITE_ROOT = "../";
   var buildTheme = getComputedStyle(document.documentElement).getPropertyValue("--deck-theme").trim();
   var themeLink = null;
@@ -135,7 +137,8 @@
       '<label class="visually-hidden" for="deck-search-input" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Search this presentation</label>' +
       '<input id="deck-search-input" type="search" placeholder="Search slides" autocomplete="off">' +
       '<ul class="deck-results" hidden></ul>' +
-      "</form>";
+      "</form>" +
+      '<button type="button" class="deck-icon-btn deck-fs" data-deck-fs aria-label="Full screen" title="Full screen (F)">' + FS_EXPAND + "</button>";
 
     var backdrop = document.createElement("div");
     backdrop.className = "deck-backdrop";
@@ -148,7 +151,7 @@
     drawer.innerHTML =
       "<header><strong>" + part.label + "</strong>" +
       '<button type="button" class="deck-icon-btn" data-deck-close aria-label="Close slide list">&times;</button></header>' +
-      "<ol></ol><footer>Left and right arrows move between slides. T changes the slide theme. Escape closes this list, then returns home.</footer>";
+      "<ol></ol><footer>Left and right arrows move between slides. T changes the slide theme. The corner icon in the top bar, or F, goes full screen. Escape closes this list.</footer>";
 
     var footerNum = document.createElement("div");
     footerNum.className = "deck-footer-num";
@@ -158,6 +161,33 @@
     var crumbs = bar.querySelector(".deck-crumbs");
     var countEl = bar.querySelector("[data-deck-count]");
     var results = bar.querySelector(".deck-results");
+
+    /* Full-screen toggle. Uses the whole page so the top bar stays usable;
+       Esc or the button leaves full screen. Hidden where the browser has no
+       Fullscreen API (some iPhones). */
+    var fsBtn = bar.querySelector("[data-deck-fs]");
+    var fsRoot = document.documentElement;
+    function fsActive() { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+    function syncFs() {
+      var on = fsActive();
+      fsBtn.innerHTML = on ? FS_SHRINK : FS_EXPAND;
+      fsBtn.setAttribute("aria-label", on ? "Exit full screen" : "Full screen");
+      fsBtn.title = on ? "Exit full screen (Esc)" : "Full screen (F)";
+      relayout();
+    }
+    if (!(fsRoot.requestFullscreen || fsRoot.webkitRequestFullscreen)) {
+      fsBtn.hidden = true;
+    }
+    fsBtn.addEventListener("click", function () {
+      if (fsActive()) {
+        (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+      } else {
+        (fsRoot.requestFullscreen || fsRoot.webkitRequestFullscreen).call(fsRoot);
+      }
+      fsBtn.blur();
+    });
+    document.addEventListener("fullscreenchange", syncFs);
+    document.addEventListener("webkitfullscreenchange", syncFs);
     var search = bar.querySelector("input");
     var list = drawer.querySelector("ol");
     var menuBtn = bar.querySelector("[data-deck-menu]");

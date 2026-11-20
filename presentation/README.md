@@ -12,7 +12,7 @@ python3 -m http.server 8090
 # then open http://127.0.0.1:8090/slides/
 ```
 
-Keys: `S` speaker view with notes, `T` cycle templates (Green, Blue), `F` full screen, `Esc` overview off.
+Keys: `S` speaker view with notes, `T` cycle templates (Green, Blue), `F` or the corner icon at the top right for full screen.
 
 ## Edit and re-render
 
