@@ -12,6 +12,7 @@ format:
 ## Same Context, Different Clinician {#welcome .intro-slide .welcome-slide .paper-title .section-divider .part-title .sd-7 style="--deck-heading: var(--sd-on-ink); --deck-ink: var(--sd-on-ink); --deck-soft: var(--sd-on-ink); --deck-accent: var(--sd-on-ink); --deck-accent-strong: var(--sd-on-ink); --deck-line: var(--sd-on-ink); --deck-gradient: linear-gradient(var(--sd-on-ink), var(--sd-on-ink));"}
 
 ```{=html}
+<figure class="hero-photo" aria-hidden="true"><img src="img/clinician-vs-ai.jpg" alt=""></figure>
 <p class="iw-kicker">ALTA 2026 · Melbourne</p>
 <div class="iw-rule" aria-hidden="true"></div>
 <p class="iw-sub">Recoverable pragmatic signatures of language models in clinical history-taking</p>

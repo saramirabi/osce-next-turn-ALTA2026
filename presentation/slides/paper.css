@@ -443,3 +443,53 @@ html[data-deck-theme="original"] {
              linear-gradient(115deg, #14283b 0%, #1b467f 55%, #245ba6 100%);
   --sd-7-ink: #ffffff;
 }
+
+/* Title-slide photo: real clinician vs synthetic AI clinician, in a rounded
+   frame on the right of the title card. Fades and zooms in when the slide
+   opens, then drifts slowly (Ken Burns). Static for reduced motion. */
+.reveal .welcome-slide.paper-title > h2 { max-width: 660px; }
+.reveal .welcome-slide.paper-title .iw-sub { max-width: 640px; font-size: 31px; }
+.reveal .welcome-slide .hero-photo {
+  position: absolute;
+  top: 166px;
+  right: 22px;
+  width: 470px;
+  height: 264px;
+  margin: 0;
+  overflow: hidden;
+  border-radius: 18px;
+  border: 2px solid rgb(255 255 255 / 0.55);
+  box-shadow: 0 18px 40px rgb(0 0 0 / 0.28);
+  opacity: 0;
+}
+.reveal .welcome-slide .hero-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  max-width: none;
+  max-height: none;
+  object-fit: cover;
+  transform-origin: 50% 40%;
+}
+.reveal .slides section.present .hero-photo {
+  animation: hp-in 1s cubic-bezier(0.2, 0.7, 0.2, 1) 0.2s forwards;
+}
+.reveal .slides section.present .hero-photo img {
+  animation: hp-drift 18s ease-in-out 1.2s infinite alternate;
+}
+@keyframes hp-in {
+  from { opacity: 0; transform: translateY(14px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes hp-drift {
+  from { transform: scale(1) translate(0, 0); }
+  to { transform: scale(1.1) translate(-2%, 1%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal .welcome-slide .hero-photo,
+  .reveal .welcome-slide .hero-photo img { animation: none !important; opacity: 1; transform: none; }
+}
+@media print {
+  .reveal .welcome-slide .hero-photo { opacity: 1; }
+}
